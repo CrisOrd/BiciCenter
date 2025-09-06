@@ -4,6 +4,5 @@ from  menu import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('menu/', views.display, name='menu'),
-    path('suma/', views.suma, name='suma'),
+    path('menu/', views.mainPage, name='menu'),
 ]
