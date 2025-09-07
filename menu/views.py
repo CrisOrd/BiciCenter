@@ -10,3 +10,6 @@ def mainPage(request):
 
 def loginPage(request):
     return render(request, 'login.html')
+
+def registrarPage(request):
+    return render(request, 'registrar.html')
