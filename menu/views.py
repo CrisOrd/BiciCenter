@@ -8,3 +8,5 @@ from django.shortcuts import render
 def mainPage(request):
     return render(request, 'master.html')
 
+def loginPage(request):
+    return render(request, 'login.html')

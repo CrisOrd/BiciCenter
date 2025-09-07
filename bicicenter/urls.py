@@ -5,4 +5,5 @@ from  menu import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/', views.mainPage, name='menu'),
+    path('login/', views.loginPage, name='login'),
 ]
