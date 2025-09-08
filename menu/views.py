@@ -14,5 +14,9 @@ def loginPage(request):
     return render(request, 'login.html')
 
 def mantemientoPage(request):
+<<<<<<< Updated upstream
+    return render(request, 'mantenimiento.html')
+>>>>>>> Stashed changes
+=======
     return render(request, 'mantenimiento.html')
 >>>>>>> Stashed changes

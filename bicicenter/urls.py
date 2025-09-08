@@ -9,5 +9,8 @@ urlpatterns = [
 =======
     path('login/', views.loginPage, name='login'),
     path('mantenimiento/', views.mantemientoPage, name='mantenimiento'),    
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 ]
