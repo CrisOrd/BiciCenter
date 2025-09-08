@@ -8,3 +8,11 @@ from django.shortcuts import render
 def mainPage(request):
     return render(request, 'master.html')
 
+<<<<<<< Updated upstream
+=======
+def loginPage(request):
+    return render(request, 'login.html')
+
+def mantemientoPage(request):
+    return render(request, 'mantenimiento.html')
+>>>>>>> Stashed changes
