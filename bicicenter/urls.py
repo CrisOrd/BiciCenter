@@ -5,12 +5,7 @@ from  menu import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/', views.mainPage, name='menu'),
-<<<<<<< Updated upstream
-=======
     path('login/', views.loginPage, name='login'),
-    path('mantenimiento/', views.mantemientoPage, name='mantenimiento'),    
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+    path('registrar/', views.registrarPage, name='registrar'),
+    path('mantenimiento/', views.mantemientoPage, name='mantenimiento'),
 ]
