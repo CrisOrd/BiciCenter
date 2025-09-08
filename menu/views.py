@@ -13,3 +13,6 @@ def loginPage(request):
 
 def registrarPage(request):
     return render(request, 'registrar.html')
+
+def mantemientoPage(request):
+    return render(request, 'mantenimiento.html')
