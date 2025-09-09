@@ -15,3 +15,6 @@ def registrarPage(request):
 
 def mantemientoPage(request):
     return render(request, 'mantenimiento.html')
+
+def tienda(request):
+    return render(request, 'tienda.html')

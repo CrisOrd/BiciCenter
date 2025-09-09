@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de Productos</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: 'Poppins', sans-serif;
+    }
+    .product-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      background: #fff;
+      height: 100%;
+    }
+    .product-card:hover {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+    }
+    .product-img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      padding: 15px;
+    }
+    .product-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    .product-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #3483fa;
+    }
+    .btn-cart {
+      background: #3483fa;
+      color: #fff;
+      border-radius: 6px;
+    }
+    .btn-cart:hover {
+      background: #2968c8;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra superior -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="#">Bici Center</a>
+      <form class="d-flex ms-auto">
+        <input class="form-control me-2" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Contenido -->
+  <div class="container my-5">
+    <h2 class="mb-4">Catálogo de Productos</h2>
+    <div class="row g-4">
+      
+      <!-- Producto 1 -->
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/freno.jpg' %}" class="product-img" alt="Freno de disco">
+          <h5 class="product-title">Freno de Disco Shimano</h5>
+          <p class="product-price">$12.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+
+      <!-- Producto 2 -->
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/cadena.jpg' %}" class="product-img" alt="Cadena bicicleta">
+          <h5 class="product-title">Cadena de Bicicleta</h5>
+          <p class="product-price">$8.500</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+
+      <!-- Producto 3 -->
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/casco.jpg' %}" class="product-img" alt="Casco seguridad">
+          <h5 class="product-title">Casco MTB</h5>
+          <p class="product-price">$14.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+
+      <!-- Producto 4 -->
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/luces.jpg' %}" class="product-img" alt="Luces bicicleta">
+          <h5 class="product-title">Luces LED Recargables</h5>
+          <p class="product-price">$9.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
