@@ -8,15 +8,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-            .header-top {
-                background-color: midnightblue; 
+            .header-top { 
+                background: linear-gradient(midnightblue,rgb(0, 168, 0)); 
             }
             .header-bottom {
-                background-color: #fff;
-                border-bottom: 1px solid #ccc;
+                background-color: rgb(0, 168, 0)    ;
+
+                border-bottom: 1px solid rgb(0, 168, 0);
             }
             .navbar-brand img {
-                height: 40px; /* Ajusta el tamaño del logo */
+                height: 55px; 
             }
             .search-bar {
                 width: 100%;
@@ -39,7 +40,7 @@
                 color: #333 !important;
             }
             .main-content {
-                background-color: #f5f5f5;
+                background-color: rgb(0, 168, 0);
                 padding: 20px 0;
             }
             .product-card {
@@ -63,7 +64,7 @@
     <header>
         <div class="header-top">
             <div class="container d-flex justify-content-between align-items-center">
-                <a class="navbar-brand" href="#">BiciCenter</a>
+                <a class="navbar-brand" href="http://127.0.0.1:8000/menu/#"><img src="/static/img/biciCenter.png" alt=""></a>
                 <form class="d-flex search-bar" role="search">
                     <input class="form-control" type="search" placeholder="Busca tu bicicleta, repuestos y más" aria-label="Search">
                     <button class="btn" type="submit">🔍</button>
@@ -81,27 +82,18 @@
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Categorías</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Ofertas del Día</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Tiendas Oficiales</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Agenda tu Cita</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/registrobici/?#">Agenda tu Cita</a>
                             </li>
                         </ul>
                         <ul class="navbar-nav ms-auto">
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Registrate</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/registro/?#">Registrate</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Iniciar Sesion</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/inicioSesion/#">Iniciar Sesion</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">🛒 Carrito</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/carrito/?#">🛒 Carrito</a>
                             </li>
                         </ul>
                     </div>
@@ -156,10 +148,35 @@
                 </div>
             </div>
         </div>
+        <div class="container">
+            <h2 class="mb-4">Productos Destacados</h2>
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Bicicleta de Montaña">
+                        <div class="card-body">
+                            <h5 class="card-title">Bicicleta de Montaña XC-200</h5>
+                            <p class="card-text text-success">$299.990</p>
+                            <p class="text-muted"><small>Envío gratis</small></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Casco para Bicicleta">
+                        <div class="card-body">
+                            <h5 class="card-title">Casco de Seguridad Pro-Ride</h5>
+                            <p class="card-text text-success">$25.990</p>
+                            <p class="text-muted"><small>Envío gratis</small></p>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
     </main>
 
-    <footer class="bg-light text-center text-lg-start mt-4">
-        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+    <footer class="bg-light text-center text-lg-start mt-6">
+        <div class="text-center p-3" style="background: linear-gradient(rgb(0,168,0),rgb(25,25,112));">
             © 2025 BiciCenter. Todos los derechos reservados.
         </div>
     </footer>
