@@ -15,7 +15,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      background: linear-gradient(153deg, rgb(0,168,0), rgb(25,25,112));
       font-family: 'Poppins', sans-serif;
     }
     .wrapper {
@@ -28,8 +28,8 @@
       text-align: center;
     }
     .wrapper img {
-      width: 90px;
-      margin-bottom: 10px;
+      width: 110px;
+      margin-bottom: 0px;
     }
     .wrapper h2 {
       font-size: 24px;
@@ -108,7 +108,19 @@
     <form>
       <div class="input-box">
         <i class="bi bi-person-fill"></i>
+        <input type="text" placeholder="Nombre" required>
+      </div>
+      <div class="input-box">
+        <i class="bi bi-person-fill"></i>
+        <input type="text" placeholder="Apellido" required>
+      </div>
+      <div class="input-box">
+        <i class="bi bi-person-fill"></i>
         <input type="text" placeholder="Nombre de usuario" required>
+      </div>
+      <div class="input-box">
+        <i class="bi bi-envelope-fill"></i>
+        <input type="email" placeholder="Correo electrónico" required>
       </div>
       <div class="input-box">
         <i class="bi bi-envelope-fill"></i>
@@ -128,7 +140,7 @@
       </div>
       <button type="submit" class="btn-register">Registrarse</button>
       <div class="text">
-        <h3>¿Ya tienes una cuenta? <a href="/login/">Inicia sesión</a></h3>
+        <h3>¿Ya tienes una cuenta? <a href="http://127.0.0.1:8000/inicioSesion/#">Inicia sesión</a></h3>
       </div>
     </form>
   </div>

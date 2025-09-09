@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registro de Bicicleta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background:linear-gradient(153deg, rgb(0,168,0), rgb(25,25,112));
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 18px;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 30px auto 0;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> Registro de Bicicleta</h1>
+        
+        <form method="post" action="#">
+            <!-- Datos del Propietario -->
+            <h2 class="section-title">Datos del Propietario</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre <span class="required">*</span></label>
+                    <input type="text" name="first_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Apellido <span class="required">*</span></label>
+                    <input type="text" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>RUT <span class="required">*</span></label>
+                <input type="text" name="rut" placeholder="12.345.678-9" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Teléfono <span class="required">*</span></label>
+                    <input type="tel" name="phone" required>
+                </div>
+            </div>
+
+            <h2 class="section-title">Datos de la Bicicleta</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marca <span class="required">*</span></label>
+                    <select name="bike_brand" required>
+                        <option value="">Seleccione una marca</option>
+                        <option value="trek">Trek</option>
+                        <option value="giant">Giant</option>
+                        <option value="specialized">Specialized</option>
+                        <option value="cannondale">Cannondale</option>
+                        <option value="scott">Scott</option>
+                        <option value="other">Otra</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Color <span class="required">*</span></label>
+                    <select name="bike_color" required>
+                        <option value="">Seleccione un color</option>
+                        <option value="negro">Negro</option>
+                        <option value="blanco">Blanco</option>
+                        <option value="rojo">Rojo</option>
+                        <option value="azul">Azul</option>
+                        <option value="verde">Verde</option>
+                        <option value="gris">Gris</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo <span class="required">*</span></label>
+                    <select name="bike_type" required>
+                        <option value="">Seleccione el tipo</option>
+                        <option value="mountain">Montaña</option>
+                        <option value="road">Ruta</option>
+                        <option value="hybrid">Híbrida</option>
+                        <option value="electric">Eléctrica</option>
+                        <option value="city">Urbana</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Año</label>
+                    <input type="number" name="bike_year" min="1980" max="2025" placeholder="2024">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notas Adicionales</label>
+                <textarea name="additional_notes" placeholder="Información adicional sobre la bicicleta..."></textarea>
+            </div>
+
+            <button type="submit" class="btn">Registrar Bicicleta</button>
+        </form>
+    </div>
+
+    <script>
+        // Formatear RUT mientras se escribe
+        document.querySelector('input[name="rut"]').addEventListener('input', function() {
+            let rut = this.value.replace(/[^0-9kK]/g, '');
+            if (rut.length > 1) {
+                rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
+            }
+            this.value = rut.toUpperCase();
+        });
+
+        // Validación básica del formulario
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const required = this.querySelectorAll('[required]');
+            let valid = true;
+            
+            required.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#e74c3c';
+                    valid = false;
+                } else {
+                    field.style.borderColor = '#ddd';
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Complete todos los campos obligatorios');
+            }
+        });
+    </script>
+</body>
+</html>
