@@ -55,21 +55,22 @@
     </header>
 
 <main class="main-content">
+    <div class="container my-5">
+    <h2 class="mb-4">Repuestos</h2>
     <div class="row row-cols-1 row-cols-md-4 g-4">
-    {% block content %}
-    {% for repuesto in repuestos %}
-    <div class="col">
-        <div class="card h-100 product-card">
-            <!-- Si tienes imagen, usa repuesto.imagen.url -->
-            <div class="card-body">
-                <h5 class="card-title">{{ repuesto.nombre }}</h5>
-                <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
-                <p class="card-text text-success">${{ repuesto.precio }}</p>
+        {% for repuesto in repuestos %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ repuesto.nombre }}</h5>
+                    <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
+                    <p class="card-text text-success">${{ repuesto.precio }}</p>
+                </div>
             </div>
         </div>
+        {% empty %}
+        <p>No hay repuestos registrados.</p>
+        {% endfor %}
     </div>
-    {% empty %}
-    <p>No hay repuestos registrados.</p>
-    {% endfor %}
 </div>
 </main>

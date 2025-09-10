@@ -7,11 +7,9 @@
         <title>{% block title %}BiciCenter - Tu Centro de Bicicletas Favorito{% endblock %}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'css/master.css' %}">
-
-<style>
-
-        </style>
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/master.css' %}">
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     </head>
     <body>
 
@@ -77,8 +75,6 @@
         {% endfor %}
     </div>
 
-    <hr class="my-4">
-
     <!-- Accesorios -->
     <a href="http://127.0.0.1:8000/accesorios" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Accesorios</a>
     <div class="row row-cols-1 row-cols-md-4 g-4">
@@ -97,7 +93,7 @@
         {% endfor %}
     </div>
 
-    <hr class="my-4">
+
 
     <!-- Repuestos -->
     <a href="http://127.0.0.1:8000/repuestos" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Repuestos</a>
@@ -116,7 +112,12 @@
         <p>No hay repuestos registrados.</p>
         {% endfor %}
     </div>
-
+    
 </main>
 
+<footer>
+    <div class="footer-content text-center py-3">
+        <p class="mb-0">&copy; 2024 BiciCenter. Todos los derechos reservados.</p>
+    </div>
+</footer>
 

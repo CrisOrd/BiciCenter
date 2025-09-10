@@ -14,9 +14,9 @@ urlpatterns = [
     path('tienda/', views.tienda, name='tienda'),
     path('registrobici/', views.registroBicicleta, name='registrobici'),
     path('carrito/', views.carrito, name='carrito'),
-    path('repuestos/', views.repuesto, name='repuestos'),
-    path('accesorios/', views.accesorios, name='accesorios'),
     path('bicicletas/', views.BicicletasListView.as_view(), name='bicicletas'), 
     path('', views.MasterListView.as_view(), name='master'),  # Página principal
-    
+    path('repuestos/', views.RepuestosListView.as_view(), name='repuestos'),
+    path('accesorios/', views.AccesoriosListView.as_view(), name='accesorios'),
+
 ]

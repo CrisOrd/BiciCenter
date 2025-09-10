@@ -9,12 +9,10 @@ class BicicletaAdmin(admin.ModelAdmin):
 
 @admin.register(Repuesto)
 class RepuestoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'precio', 'bicicleta')
+    list_display = ('nombre', 'precio')  # Quita 'bicicleta'
     search_fields = ('nombre',)
-    list_filter = ('bicicleta',)
 
 @admin.register(Accesorio)
 class AccesorioAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'precio', 'bicicleta')
+    list_display = ('nombre', 'precio')  # Quita 'bicicleta'
     search_fields = ('nombre',)
-    list_filter = ('bicicleta',)

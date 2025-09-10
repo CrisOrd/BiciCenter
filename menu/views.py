@@ -64,9 +64,19 @@ class MasterListView(ListView):
         context['accesorios'] = Accesorio.objects.all()
         return context
 
-# Vista para crear un nuevo objeto Bicicleta
+
 class BicicletaCreateView(CreateView):
     model = Bicicleta
     fields = ['nombre', 'modelo', 'descripcion', 'precio', 'imagen']
     template_name = 'formulario_bici.html'
     success_url = reverse_lazy('mantenimiento')
+
+class RepuestosListView(ListView):
+    model = Repuesto
+    template_name = 'repuestos.html'
+    context_object_name = 'repuestos'
+
+class AccesoriosListView(ListView):
+    model = Accesorio
+    template_name = 'accesorios.html'
+    context_object_name = 'accesorios'
