@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo de Productos</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/tienda.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="#">Bici Center</a>
+      <form class="d-flex ms-auto">
+        <input class="form-control me-2" type="search" placeholder="Buscar productos..." aria-label="Buscar">
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+      </form>
+    </div>
+  </nav>
+  <div class="container my-5">
+    <h2 class="mb-4">Catálogo de Productos</h2>
+    <div class="row g-4">
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/freno.jpg' %}" class="product-img" alt="Freno de disco">
+          <h5 class="product-title">Freno de Disco Shimano</h5>
+          <p class="product-price">$12.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/cadena.jpg' %}" class="product-img" alt="Cadena bicicleta">
+          <h5 class="product-title">Cadena de Bicicleta</h5>
+          <p class="product-price">$8.500</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/casco.jpg' %}" class="product-img" alt="Casco seguridad">
+          <h5 class="product-title">Casco MTB</h5>
+          <p class="product-price">$14.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="product-card p-3 d-flex flex-column">
+          <img src="{% static 'img/luces.jpg' %}" class="product-img" alt="Luces bicicleta">
+          <h5 class="product-title">Luces LED Recargables</h5>
+          <p class="product-price">$9.990</p>
+          <button class="btn btn-cart mt-auto">Agregar al carrito</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
