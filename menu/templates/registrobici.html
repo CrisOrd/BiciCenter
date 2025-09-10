@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="{% static 'css/registrobici.css' %}">
 </head>
 <body>
+    
     <div class="wrapper">
-        <img src="{% static 'img/biciCenter.png' %}" alt="Logo">
+        <a href="{% url 'master' %}"><img src="{% static 'img/biciCenter.png' %}" alt="Logo"></a>
         <h2>Agenda tu Cita</h2>
         
         {% if messages %}
