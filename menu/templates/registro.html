@@ -18,44 +18,58 @@
   <div class="wrapper">
     <img src="{% static 'img/biciCenter.png' %}" alt="Logo">
     <h2>Registro de Usuario</h2>
-    <form>
-      <div class="input-box">
+    <form method="POST">
+    {% csrf_token %}
+    <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" placeholder="Nombre" required>
-      </div>
-      <div class="input-box">
+        <input type="text" placeholder="Nombre" name="nombre" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" placeholder="Apellido" required>
-      </div>
-      <div class="input-box">
+        <input type="text" placeholder="Apellido" name="apellido" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" placeholder="Nombre de usuario" required>
-      </div>
-      <div class="input-box">
+        <input type="text" placeholder="Nombre de usuario" name="username" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-envelope-fill"></i>
-        <input type="email" placeholder="Correo electrónico" required>
-      </div>
-      <div class="input-box">
+        <input type="email" placeholder="Correo electrónico" name="email" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-card-text"></i>
-        <input type="text" placeholder="RUT" required>
-      </div>
-      <div class="input-box">
+        <input type="text" placeholder="RUT" name="rut" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-lock-fill"></i>
-        <input type="password" placeholder="Contraseña" required>
-      </div>
-      <div class="input-box">
+        <input type="password" placeholder="Contraseña" name="password" required>
+    </div>
+    <div class="input-box">
         <i class="bi bi-lock-fill"></i>
-        <input type="password" placeholder="Confirmar contraseña" required>
-      </div>
-      <div class="policy">
+        <input type="password" placeholder="Confirmar contraseña" name="password2" required>
+    </div>
+    <div class="policy">
         <input type="checkbox" required>
         <span>Acepto los <a href="#">Términos y Condiciones</a></span>
-      </div>
-      <button type="submit" class="btn-register">Registrarse</button>
+    </div>
+    <button type="submit" class="btn">Registrar</button>
       <div class="text">
         <h3>¿Ya tienes una cuenta? <a href="http://127.0.0.1:8000/inicioSesion/#">Inicia sesión</a></h3>
       </div>
     </form>
   </div>
+  <script>
+        // Formatear RUT mientras se escribe (solo si no está readonly)
+        const rutInput = document.getElementById('rut');
+        if (!rutInput.readOnly) {
+            rutInput.addEventListener('input', function() {
+                let rut = this.value.replace(/[^0-9kK]/g, '');
+                if (rut.length > 1) {
+                    rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
+                }
+                this.value = rut.toUpperCase();
+            });
+        }
+    </script>
 </body>
 </html>

@@ -12,32 +12,27 @@
 </head>
 <body>
     <div class="card p-4" style="width: 100%; max-width: 380px;">
-        <div class="text-center">
-            <img src="{% static 'img/biciCenter.png' %}" alt="Logo" class="logo">
-            <h3 class="fw-bold mb-3">Bienvenido</h3>
-            <p class="text-muted">Inicia sesión para continuar</p>
-        </div>
-        <form>
-            <div class="mb-3 input-group">
-                <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-                <input type="email" class="form-control" placeholder="Correo electrónico" required>
-            </div>
-            <div class="mb-3 input-group">
-                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                <input type="password" class="form-control" placeholder="Contraseña" required>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <input type="checkbox" id="remember">
-                    <label for="remember" class="text-muted"> Recuérdame</label>
-                </div>
-                <a href="http://127.0.0.1:8000/recuperarContraseña/#" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
-            </div>
-            <button class="btn btn-primary w-100 py-2" type="submit">Iniciar Sesión</button>
-        </form>
-        <hr>
-        <p class="text-center text-muted small mb-0">&copy; 2025 | Tu Empresa</p>
+    <div class="text-center">
+        <img src="{% static 'img/biciCenter.png' %}" alt="Logo" class="logo">
+        <h3 class="fw-bold mb-3">Bienvenido</h3>
+        <p class="text-muted">Inicia sesión para continuar</p>
     </div>
+   <form method="POST">
+    {% csrf_token %}
+    <div class="mb-3 input-group">
+        <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+        <input type="text" class="form-control" name="username" placeholder="Nombre de usuario" required>
+    </div>
+    <div class="mb-3 input-group">
+        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+        <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100 py-2">Iniciar Sesión</button>
+</form>
+    <p class="text-center mt-3 mb-0">
+        ¿Aún no tienes cuenta? <a href="http://127.0.0.1:8000/registro/#">Regístrate aquí</a>
+    </p>
+</div>
 </body>
 </html>
 
