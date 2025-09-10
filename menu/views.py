@@ -24,12 +24,3 @@ def registroBicicleta(request):
 
 def carrito(request):
     return render(request, 'carrito.html')
-
-def accesoriosTodo(request):
-    return render(request, 'accesoriosTodo.html')
-
-def biciTodo(request):
-    return render(request, 'biciTodo.html')   
-
-def repuestosTodo(request):
-    return render(request, 'repuestosTodo.html')    

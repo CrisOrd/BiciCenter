@@ -1,0 +1,96 @@
+        body {
+            background: #f4f9ff;
+            font-family: "Poppins", sans-serif;
+        }
+        .container-fluid {
+            max-width: 1200px;
+            margin-top: 40px;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 2px solid #000;
+        }
+        .card-header {
+            font-weight: bold;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+            border-bottom: 2px solid #000;
+        }
+        .bike-info-card, .services-card, .service-item, .total-section {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 8px;
+        }
+        .bike-info-card {
+            height: fit-content;
+        }
+        .service-item {
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        .price {
+            font-weight: bold;
+            color: #4070f4;
+            font-size: 1.1rem;
+        }
+        .total-section {
+            padding: 20px;
+            margin-top: 20px;
+        }
+        #total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff5e62;
+        }
+        .btn-finish {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-finish:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border: 2px solid #000;
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        .form-check-input {
+            transform: scale(1.2);
+        }
+        .required {
+            color: #e74c3c;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin: 20px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4facfe;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
