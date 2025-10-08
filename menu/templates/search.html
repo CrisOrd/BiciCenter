@@ -1,0 +1,79 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}Buscar: {{ query }} - BiciCenter{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Resultados de búsqueda para: "<strong>{{ query }}</strong>"</h2>
+
+    {% if not bicicletas and not accesorios and not repuestos %}
+        <p class="text-muted">No se encontraron resultados para tu búsqueda.</p>
+    {% endif %}
+
+    {% if bicicletas %}
+    <h3 class="mt-4">Bicicletas</h3>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for bici in bicicletas %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                {% if bici.imagen %}
+                    <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
+                {% else %}
+                    <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ bici.nombre }} - {{ bici.modelo }}</h5>
+                    <p class="card-text text-success">${{ bici.precio }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if accesorios %}
+    <h3 class="mt-4">Accesorios</h3>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for accesorio in accesorios %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                {% if accesorio.imagen %}
+                    <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
+                {% else %}
+                    <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ accesorio.nombre }}</h5>
+                    <p class="card-text">{{ accesorio.descripcion|truncatewords:15 }}</p>
+                    <p class="card-text text-success">${{ accesorio.precio }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if repuestos %}
+    <h3 class="mt-4">Repuestos</h3>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for repuesto in repuestos %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                {% if repuesto.imagen %}
+                    <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
+                {% else %}
+                    <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ repuesto.nombre }}</h5>
+                    <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
+                    <p class="card-text text-success">${{ repuesto.precio }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

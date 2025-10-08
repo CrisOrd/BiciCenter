@@ -16,7 +16,7 @@
     background: rgb(204, 201, 201);
     border-bottom: 1px solid rgb(2, 120, 199);
     background-size: 300% 100%;
-    animation: smooth-cycle 10s infinite linear;
+    animation: smooth-cycle 5s infinite linear;
 }
 
             .navbar-brand img {
@@ -32,14 +32,7 @@
     background-size: 300% 100%;
     animation: smooth-cycle 10000s infinite linear;
 }
-@keyframes smooth-cycle {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
-}
+
 
             .search-bar .btn {
                 background-color: #fff;
@@ -79,7 +72,7 @@
             }
 
 footer {
-    background: linear-gradient(to right, rgb(39, 224, 2), rgb(2, 120, 199),rgb(39, 224, 2),rgb(2, 120, 199));
+    background: linear-gradient(to left, rgb(39, 224, 2), rgb(2, 120, 199),rgb(39, 224, 2),rgb(2, 120, 199));
     border-bottom: 1px solid rgb(2, 120, 199);
     background-size: 300% 100%;
     animation: smooth-cycle 5s infinite linear;
