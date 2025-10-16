@@ -17,7 +17,7 @@
                 <img src="{% static 'img/biciCenter.png' %}" alt="BiciCenter" class="logo-rectangular">
             </a>
             <form class="d-flex search-bar mx-auto" role="search" method="GET" action="{% url 'buscar' %}">
-                <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar">
+                <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar" required>
                 <button class="btn btn-outline-primary" type="submit">Buscar</button>
             </form>
             <div class="flex-shrink-0">

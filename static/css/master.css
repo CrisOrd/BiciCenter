@@ -19,18 +19,44 @@
     animation: smooth-cycle 10s infinite linear;
 }
 
-            .navbar-brand img {
-                height: 55px; 
+            .navbar-brand {
+                display: flex;
+                align-items: center;
+            }
+            .logo-rectangular {
+                height: 55px;
+                width: auto;
+                max-width: 200px;
+                object-fit: contain;
+                background: #333;
+                padding: 5px 15px;
+                border-radius: 5px;
             }
             .search-bar {
                 width: 100%;
-                max-width: 600px;
+                max-width: 300px;
+                margin: 0 20px;
+                gap: 0;
             }
 .search-bar .form-control {
-    background: linear-gradient(to right, rgb(39, 224, 2), rgb(2, 120, 199), rgb(255, 165, 0));
-    border-bottom: 1px solid rgb(2, 120, 199);
-    background-size: 300% 100%;
-    animation: smooth-cycle 10000s infinite linear;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    padding: 8px 15px;
+}
+
+.search-bar .btn {
+    background-color: #0d6efd;
+    color: #fff;
+    border: 1px solid #0d6efd;
+    border-radius: 0 20px 20px 0;
+    padding: 8px 15px;
+    white-space: nowrap;
+}
+
+.search-bar .btn:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
 }
 @keyframes smooth-cycle {
     0% {

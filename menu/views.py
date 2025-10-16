@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import View 
 import json
 from decimal import Decimal
+from django.db.models import Q
 
 def inicioPage(request):
     # Si el usuario ya está autenticado, redirigirlo a la página principal.
@@ -357,3 +358,43 @@ class RegistroBicicletaView(View):
         except Exception as e:
             messages.error(request, f'Ocurrió un error al registrar: {e}')
             return render(request, 'registrobici.html')
+
+class Buscar(View):
+    """Vista para manejar la búsqueda de productos"""
+    
+    def get(self, request):
+        query = request.GET.get('q', '').strip()
+        
+        bicicletas = []
+        repuestos = []
+        accesorios = []
+        
+        if query:
+            # Búsqueda en Bicicletas (nombre, modelo, marca)
+            bicicletas = Bicicleta.objects.filter(
+                Q(nombre__icontains=query) | 
+                Q(modelo__icontains=query) |
+                Q(marca__icontains=query)
+            )
+            
+            # Búsqueda en Repuestos (nombre, descripción)
+            repuestos = Repuesto.objects.filter(
+                Q(nombre__icontains=query) | 
+                Q(descripcion__icontains=query)
+            )
+            
+            # Búsqueda en Accesorios (nombre, descripción)
+            accesorios = Accesorio.objects.filter(
+                Q(nombre__icontains=query) | 
+                Q(descripcion__icontains=query)
+            )
+        
+        context = {
+            'query': query,
+            'bicicletas': bicicletas,
+            'repuestos': repuestos,
+            'accesorios': accesorios,
+            'total_resultados': len(bicicletas) + len(repuestos) + len(accesorios)
+        }
+        
+        return render(request, 'buscar.html', context)
