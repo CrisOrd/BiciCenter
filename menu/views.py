@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.generic import ListView
@@ -7,13 +7,30 @@ from .models import (Bicicleta, Repuesto, Accesorio, Cliente, BicicletaCliente,
                      ServicioMantenimiento, OrdenMantenimiento, ItemOrdenMantenimiento)
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.views import View 
 import json
 from decimal import Decimal
 from django.db.models import Q
 
+
+# ============= FUNCIONES AUXILIARES =============
+
+def aplicar_ordenamiento(queryset, ordenar_por):
+    """Función auxiliar para aplicar ordenamiento a un queryset"""
+    orden_map = {
+        'nombre_asc': 'nombre',
+        'nombre_desc': '-nombre',
+        'precio_asc': 'precio',
+        'precio_desc': '-precio',
+        'modelo_asc': 'modelo',
+        'modelo_desc': '-modelo',
+    }
+    return queryset.order_by(orden_map[ordenar_por]) if ordenar_por in orden_map else queryset
+
+
+# ============= AUTENTICACIÓN =============
+
 def inicioPage(request):
-    # Si el usuario ya está autenticado, redirigirlo a la página principal.
+    """Vista para inicio de sesión"""
     if request.user.is_authenticated:
         return redirect('master')
         
@@ -26,16 +43,22 @@ def inicioPage(request):
         
         if user is not None:
             login(request, user)
-            # Retorna JSON con la URL de redirección
-            return JsonResponse({'success': True, 'redirect_url': next_url, 'message': f'¡Bienvenido de nuevo, {user.first_name}!'})
+            return JsonResponse({
+                'success': True, 
+                'redirect_url': next_url, 
+                'message': f'¡Bienvenido de nuevo, {user.first_name}!'
+            })
         else:
-            # Respuesta JSON en caso de error
-            return JsonResponse({'success': False, 'message': 'Nombre de usuario o contraseña incorrectos.'})
+            return JsonResponse({
+                'success': False, 
+                'message': 'Nombre de usuario o contraseña incorrectos.'
+            })
 
     return render(request, 'inicioSesion.html')
 
+
 def registroPage(request):
-    # Si el usuario ya está autenticado, redirigirlo a la página principal.
+    """Vista para registro de usuarios"""
     if request.user.is_authenticated:
         return redirect('master')
 
@@ -49,6 +72,7 @@ def registroPage(request):
         password2 = request.POST.get('password2')
         next_url = request.POST.get('next', 'master')
 
+        # Validaciones
         if password != password2:
             return JsonResponse({'success': False, 'message': 'Las contraseñas no coinciden.'})
 
@@ -59,201 +83,146 @@ def registroPage(request):
             return JsonResponse({'success': False, 'message': 'El RUT ya se encuentra registrado.'})
 
         try:
-            # Crea el objeto User
-            user = User.objects.create_user(username=username, email=email, password=password, first_name=nombre, last_name=apellido)
-            user.save()
+            # Crear usuario y cliente
+            user = User.objects.create_user(
+                username=username, 
+                email=email, 
+                password=password, 
+                first_name=nombre, 
+                last_name=apellido
+            )
+            Cliente.objects.create(
+                rut=rut, 
+                nombre=nombre, 
+                apellido=apellido, 
+                email=email
+            )
 
-            # Crea el objeto Cliente
-            cliente = Cliente.objects.create(rut=rut, nombre=nombre, apellido=apellido, email=email)
-            cliente.save()
-
-            # Inicia sesión inmediatamente después de crear la cuenta
+            # Iniciar sesión automáticamente
             user_auth = authenticate(request, username=username, password=password)
             if user_auth is not None:
                 login(request, user_auth)
-                return JsonResponse({'success': True, 'redirect_url': next_url, 'message': f'¡Bienvenido, {user.first_name}! Tu cuenta ha sido creada y has iniciado sesión exitosamente.'})
+                return JsonResponse({
+                    'success': True, 
+                    'redirect_url': next_url, 
+                    'message': f'¡Bienvenido, {user.first_name}! Tu cuenta ha sido creada exitosamente.'
+                })
             else:
-                return JsonResponse({'success': False, 'message': 'Tu cuenta fue creada, pero no se pudo iniciar sesión automáticamente. Por favor, inicia sesión manualmente.'})
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Cuenta creada, pero no se pudo iniciar sesión. Inicia sesión manualmente.'
+                })
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Ocurrió un error al registrar: {e}'})
 
     return render(request, 'registro.html')
 
+
 def logoutUser(request):
+    """Vista para cerrar sesión"""
     next_url = request.GET.get('next', 'master')
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
     return redirect(next_url)
 
 
-@login_required
-def agendar_cita(request):
-    """Vista para registrar la bicicleta del cliente"""
-    user = request.user
-    cliente_data = None
+# ============= VISTAS DE PRODUCTOS CON FILTROS =============
+
+def BicicletasListView(request):
+    """Vista para listar bicicletas con filtros"""
+    bicicletas = Bicicleta.objects.all()
     
-    try:
-        # Buscar cliente por email del usuario autenticado
-        cliente_data = Cliente.objects.get(email=user.email)
-    except Cliente.DoesNotExist:
-        # Si no existe el cliente, crear uno con los datos del usuario
-        cliente_data = Cliente.objects.create(
-            rut="",  # Se completará en el formulario
-            nombre=user.first_name,
-            apellido=user.last_name,
-            email=user.email
+    # Aplicar filtros
+    tipo_filtro = request.GET.get('tipo', '')
+    if tipo_filtro:
+        bicicletas = bicicletas.filter(tipo_bicicleta=tipo_filtro)
+    
+    # Aplicar ordenamiento
+    ordenar = request.GET.get('ordenar', '')
+    bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
+    
+    context = {
+        'bicicletas': bicicletas,
+        'tipos_disponibles': Bicicleta.objects.values_list('tipo_bicicleta', flat=True).distinct(),
+    }
+    return render(request, 'bicicletas.html', context)
+
+
+def RepuestosListView(request):
+    """Vista para listar repuestos con filtros"""
+    repuestos = Repuesto.objects.all()
+    
+    # Aplicar ordenamiento
+    ordenar = request.GET.get('ordenar', '')
+    repuestos = aplicar_ordenamiento(repuestos, ordenar)
+    
+    return render(request, 'repuestos.html', {'repuestos': repuestos})
+
+
+def AccesoriosListView(request):
+    """Vista para listar accesorios con filtros"""
+    accesorios = Accesorio.objects.all()
+    
+    # Aplicar ordenamiento
+    ordenar = request.GET.get('ordenar', '')
+    accesorios = aplicar_ordenamiento(accesorios, ordenar)
+    
+    return render(request, 'accesorios.html', {'accesorios': accesorios})
+
+
+def Buscar(request):
+    """Vista para buscar productos con filtros"""
+    query = request.GET.get('q', '').strip()
+    ordenar = request.GET.get('ordenar', '')
+    
+    bicicletas = []
+    repuestos = []
+    accesorios = []
+    
+    if query:
+        # Búsqueda en Bicicletas
+        bicicletas = Bicicleta.objects.filter(
+            Q(nombre__icontains=query) | 
+            Q(modelo__icontains=query) |
+            Q(descripcion__icontains=query) |
+            Q(tipo_bicicleta__icontains=query) |
+            Q(modelo_bicicleta__icontains=query)
         )
-
-    if request.method == 'POST':
-        try:
-            # Obtener datos del formulario
-            bike_brand = request.POST.get('bike_brand')
-            bike_color = request.POST.get('bike_color')
-            bike_type = request.POST.get('bike_type')
-            bike_year = request.POST.get('bike_year')
-            additional_notes = request.POST.get('additional_notes', '')
-            rut_from_form = request.POST.get('rut') # Obtener el RUT del formulario
-
-            # Siempre actualizar el RUT del cliente con el valor del formulario
-            # Esto maneja el caso donde el RUT ya existe y el campo es "readonly"
-            if rut_from_form and not cliente_data.rut:
-                cliente_data.rut = rut_from_form
-                cliente_data.save()
-
-            # Crear nueva bicicleta
-            nueva_bicicleta = BicicletaCliente.objects.create(
-                cliente=cliente_data,
-                marca=bike_brand,
-                color=bike_color,
-                tipo=bike_type,
-                año=int(bike_year) if bike_year else None,
-                notas_adicionales=additional_notes
-            )
-            
-            messages.success(request, '¡Tu bicicleta ha sido registrada exitosamente!')
-            return redirect('mantenimiento')
-            
-        except Exception as e:
-            messages.error(request, f'Ocurrió un error al registrar: {e}')
-    
-    # Contexto con datos del usuario autenticado - IMPORTANTE: pasar request
-    context = {
-        'user': user,
-        'cliente': cliente_data
-    }
-    
-    return render(request, 'registrobici.html', context)
-
-@login_required
-def mantemientoPage(request):
-    """Vista para mostrar la página de mantenimiento y procesar órdenes"""
-    user = request.user
-    cliente_data = None
-    bicicleta_data = None
-    
-    try:
-        # Obtener cliente por email del usuario autenticado
-        cliente_data = Cliente.objects.get(email=user.email)
-        # Obtener la última bicicleta registrada del cliente
-        bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
-    except Cliente.DoesNotExist:
-        messages.error(request, 'Debes completar tu perfil primero.')
-        return redirect('registrobici')
-    
-    if not bicicleta_data:
-        messages.error(request, 'Debes registrar tu bicicleta primero.')
-        return redirect('registrobici')
-
-    if request.method == 'POST':
-        try:
-            # Obtener servicios seleccionados del formulario
-            servicios_seleccionados = request.POST.getlist('servicios')
-            
-            if not servicios_seleccionados:
-                messages.error(request, 'Debes seleccionar al menos un servicio.')
-                context = {
-                    'user': user,
-                    'cliente': cliente_data,
-                    'bicicleta': bicicleta_data,
-                    'servicios': ServicioMantenimiento.objects.all()
-                }
-                return render(request, 'mantenimiento.html', context)
-
-            # Crear orden de mantenimiento
-            orden = OrdenMantenimiento.objects.create(
-                cliente=cliente_data,
-                bicicleta=bicicleta_data,
-                estado='pendiente'
-            )
-
-            # Crear items de la orden para cada servicio seleccionado
-            for servicio_nombre in servicios_seleccionados:
-                try:
-                    servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
-                    ItemOrdenMantenimiento.objects.create(
-                        orden=orden,
-                        servicio=servicio,
-                        precio=servicio.precio
-                    )
-                except ServicioMantenimiento.DoesNotExist:
-                    continue
-
-            # Calcular totales automáticamente
-            orden.calcular_totales()
-            
-            messages.success(request, f'¡Orden de mantenimiento #{orden.id} creada exitosamente! Total: ${orden.total}')
-            return redirect('mantenimiento')
-            
-        except Exception as e:
-            messages.error(request, f'Error al crear la orden: {e}')
-    
-    # Obtener servicios disponibles para mostrar en el template
-    servicios = ServicioMantenimiento.objects.all()
+        
+        # Búsqueda en Repuestos
+        repuestos = Repuesto.objects.filter(
+            Q(nombre__icontains=query) | 
+            Q(descripcion__icontains=query)
+        )
+        
+        # Búsqueda en Accesorios
+        accesorios = Accesorio.objects.filter(
+            Q(nombre__icontains=query) | 
+            Q(descripcion__icontains=query)
+        )
+        
+        # Aplicar ordenamiento
+        if ordenar:
+            bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
+            repuestos = aplicar_ordenamiento(repuestos, ordenar)
+            accesorios = aplicar_ordenamiento(accesorios, ordenar)
     
     context = {
-        'user': user,
-        'cliente': cliente_data,
-        'bicicleta': bicicleta_data,
-        'servicios': servicios
+        'query': query,
+        'bicicletas': bicicletas,
+        'repuestos': repuestos,
+        'accesorios': accesorios,
+        'total_resultados': len(bicicletas) + len(repuestos) + len(accesorios)
     }
     
-    return render(request, 'mantenimiento.html', context)
+    return render(request, 'buscar.html', context)
 
 
-@login_required
-def historialMantenimientosPage(request):
-    """Vista para mostrar el historial de mantenimientos del usuario"""
-    user = request.user
-    try:
-        cliente = Cliente.objects.get(email=user.email)
-        ordenes = OrdenMantenimiento.objects.filter(cliente=cliente).order_by('-fecha_creacion')
-    except Cliente.DoesNotExist:
-        ordenes = []
-    
-    context = {
-        'user': user,
-        'ordenes': ordenes
-    }
-    return render(request, 'historial_mantenimientos.html', context)
-
-# Class-based views for product lists
-class BicicletasListView(ListView):
-    model = Bicicleta
-    template_name = 'bicicletas.html'
-    context_object_name = 'bicicletas'
-
-class RepuestosListView(ListView):
-    model = Repuesto
-    template_name = 'repuestos.html'
-    context_object_name = 'repuestos'
-    
-class AccesoriosListView(ListView):
-    model = Accesorio
-    template_name = 'accesorios.html'
-    context_object_name = 'accesorios'
+# ============= VISTA MASTER =============
 
 class MasterListView(ListView):
+    """Vista principal con productos destacados"""
     model = Bicicleta
     template_name = 'master.html'
     context_object_name = 'productos'
@@ -265,136 +234,170 @@ class MasterListView(ListView):
         context['repuestos'] = Repuesto.objects.all()[:4]
         return context
 
+
+# ============= GESTIÓN DE BICICLETAS Y MANTENIMIENTO =============
+
 @login_required
-def finalizar_orden(request):
-    """
-    Procesa la solicitud de finalización de una orden de mantenimiento
-    y devuelve una respuesta JSON.
-    """
+def agendar_cita(request):
+    """Vista para registrar la bicicleta del cliente"""
+    user = request.user
+    
+    # Obtener o crear cliente
+    cliente_data, created = Cliente.objects.get_or_create(
+        email=user.email,
+        defaults={
+            'rut': '',
+            'nombre': user.first_name,
+            'apellido': user.last_name,
+        }
+    )
+
     if request.method == 'POST':
         try:
-            # 1. Obtener la bicicleta del usuario
-            cliente = Cliente.objects.get(email=request.user.email)
-            bicicleta = BicicletaCliente.objects.filter(cliente=cliente).first()
-            if not bicicleta:
-                return JsonResponse({'success': False, 'error': 'No se encontró una bicicleta registrada para este usuario.'})
+            # Actualizar RUT si es necesario
+            rut_from_form = request.POST.get('rut')
+            if rut_from_form and not cliente_data.rut:
+                cliente_data.rut = rut_from_form
+                cliente_data.save()
 
-            # 2. Leer los datos JSON de la solicitud
-            data = json.loads(request.body)
-            servicios_nombres = data.get('servicios', [])
-            
-            # 3. Crear la Orden de Mantenimiento
-            orden = OrdenMantenimiento.objects.create(
-                cliente=cliente,
-                bicicleta=bicicleta,
-                subtotal=Decimal(str(data.get('subtotal', 0))),
-                total=Decimal(str(data.get('total', 0)))
-            )
-
-            # 4. Agregar cada servicio a la orden
-            for servicio_nombre in servicios_nombres:
-                try:
-                    servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
-                    ItemOrdenMantenimiento.objects.create(
-                        orden=orden,
-                        servicio=servicio,
-                        precio=servicio.precio
-                    )
-                except ServicioMantenimiento.DoesNotExist:
-                    # Si un servicio no existe, puedes registrar un error o ignorarlo.
-                    print(f"Advertencia: Servicio '{servicio_nombre}' no encontrado.")
-                    continue
-            
-            # Opcional: Recalcular totales en el backend si los del frontend no son fiables
-            orden.calcular_totales()
-            
-            # 5. Devolver una respuesta JSON exitosa
-            return JsonResponse({
-                'success': True,
-                'orden_id': orden.id,
-                'total': float(orden.total)
-            })
-
-        except Cliente.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'No se encontró un perfil de cliente para este usuario.'})
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Formato de datos JSON inválido en la solicitud.'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': f'Error interno del servidor: {str(e)}'})
-    
-    # 6. Manejar métodos de solicitud no permitidos (si alguien intenta un GET)
-    return JsonResponse({'success': False, 'error': 'Método de solicitud no válido.'}, status=405)
-
-class RegistroBicicletaView(View):
-    """Vista basada en clase para registro de bicicletas (alternativa)"""
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return redirect('inicioSesion')
-        return render(request, 'registrobici.html')
-
-    def post(self, request):
-        try:
-            user = request.user
-            cliente_data = Cliente.objects.get(email=user.email)
-            
-            marca = request.POST['bike_brand']
-            color = request.POST['bike_color'] 
-            tipo = request.POST['bike_type']
-            año = request.POST.get('bike_year')
-            notas = request.POST.get('additional_notes', '')
-            
+            # Crear bicicleta
             BicicletaCliente.objects.create(
                 cliente=cliente_data,
-                marca=marca,
-                color=color,
-                tipo=tipo,
-                año=int(año) if año else None,
-                notas_adicionales=notas
+                marca=request.POST.get('bike_brand'),
+                color=request.POST.get('bike_color'),
+                tipo=request.POST.get('bike_type'),
+                año=int(request.POST.get('bike_year')) if request.POST.get('bike_year') else None,
+                notas_adicionales=request.POST.get('additional_notes', '')
             )
             
             messages.success(request, '¡Tu bicicleta ha sido registrada exitosamente!')
             return redirect('mantenimiento')
-        
+            
         except Exception as e:
             messages.error(request, f'Ocurrió un error al registrar: {e}')
-            return render(request, 'registrobici.html')
-
-class Buscar(View):
-    """Vista para manejar la búsqueda de productos"""
     
-    def get(self, request):
-        query = request.GET.get('q', '').strip()
+    return render(request, 'registrobici.html', {'user': user, 'cliente': cliente_data})
+
+
+@login_required
+def mantemientoPage(request):
+    """Vista para gestionar órdenes de mantenimiento"""
+    user = request.user
+    
+    try:
+        cliente_data = Cliente.objects.get(email=user.email)
+        bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Debes completar tu perfil primero.')
+        return redirect('registrobici')
+    
+    if not bicicleta_data:
+        messages.error(request, 'Debes registrar tu bicicleta primero.')
+        return redirect('registrobici')
+
+    if request.method == 'POST':
+        servicios_seleccionados = request.POST.getlist('servicios')
         
-        bicicletas = []
-        repuestos = []
-        accesorios = []
+        if not servicios_seleccionados:
+            messages.error(request, 'Debes seleccionar al menos un servicio.')
+        else:
+            try:
+                # Crear orden
+                orden = OrdenMantenimiento.objects.create(
+                    cliente=cliente_data,
+                    bicicleta=bicicleta_data,
+                    estado='pendiente'
+                )
+
+                # Agregar servicios
+                for servicio_nombre in servicios_seleccionados:
+                    try:
+                        servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
+                        ItemOrdenMantenimiento.objects.create(
+                            orden=orden,
+                            servicio=servicio,
+                            precio=servicio.precio
+                        )
+                    except ServicioMantenimiento.DoesNotExist:
+                        continue
+
+                orden.calcular_totales()
+                messages.success(request, f'¡Orden #{orden.id} creada exitosamente! Total: ${orden.total}')
+                return redirect('mantenimiento')
+                
+            except Exception as e:
+                messages.error(request, f'Error al crear la orden: {e}')
+    
+    context = {
+        'user': user,
+        'cliente': cliente_data,
+        'bicicleta': bicicleta_data,
+        'servicios': ServicioMantenimiento.objects.all()
+    }
+    
+    return render(request, 'mantenimiento.html', context)
+
+
+@login_required
+def historialMantenimientosPage(request):
+    """Vista para mostrar el historial de mantenimientos"""
+    user = request.user
+    try:
+        cliente = Cliente.objects.get(email=user.email)
+        ordenes = OrdenMantenimiento.objects.filter(cliente=cliente).order_by('-fecha_creacion')
+    except Cliente.DoesNotExist:
+        ordenes = []
+    
+    return render(request, 'historial_mantenimientos.html', {'user': user, 'ordenes': ordenes})
+
+
+@login_required
+def finalizar_orden(request):
+    """Procesa la finalización de una orden de mantenimiento vía AJAX"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no válido.'}, status=405)
+    
+    try:
+        cliente = Cliente.objects.get(email=request.user.email)
+        bicicleta = BicicletaCliente.objects.filter(cliente=cliente).first()
         
-        if query:
-            # Búsqueda en Bicicletas (nombre, modelo, marca)
-            bicicletas = Bicicleta.objects.filter(
-                Q(nombre__icontains=query) | 
-                Q(modelo__icontains=query) |
-                Q(marca__icontains=query)
-            )
-            
-            # Búsqueda en Repuestos (nombre, descripción)
-            repuestos = Repuesto.objects.filter(
-                Q(nombre__icontains=query) | 
-                Q(descripcion__icontains=query)
-            )
-            
-            # Búsqueda en Accesorios (nombre, descripción)
-            accesorios = Accesorio.objects.filter(
-                Q(nombre__icontains=query) | 
-                Q(descripcion__icontains=query)
-            )
+        if not bicicleta:
+            return JsonResponse({'success': False, 'error': 'No se encontró una bicicleta registrada.'})
+
+        data = json.loads(request.body)
+        servicios_nombres = data.get('servicios', [])
         
-        context = {
-            'query': query,
-            'bicicletas': bicicletas,
-            'repuestos': repuestos,
-            'accesorios': accesorios,
-            'total_resultados': len(bicicletas) + len(repuestos) + len(accesorios)
-        }
+        # Crear orden
+        orden = OrdenMantenimiento.objects.create(
+            cliente=cliente,
+            bicicleta=bicicleta,
+            subtotal=Decimal(str(data.get('subtotal', 0))),
+            total=Decimal(str(data.get('total', 0)))
+        )
+
+        # Agregar servicios
+        for servicio_nombre in servicios_nombres:
+            try:
+                servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
+                ItemOrdenMantenimiento.objects.create(
+                    orden=orden,
+                    servicio=servicio,
+                    precio=servicio.precio
+                )
+            except ServicioMantenimiento.DoesNotExist:
+                continue
         
-        return render(request, 'buscar.html', context)
+        orden.calcular_totales()
+        
+        return JsonResponse({
+            'success': True,
+            'orden_id': orden.id,
+            'total': float(orden.total)
+        })
+
+    except Cliente.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'No se encontró el cliente.'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Formato JSON inválido.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Error interno: {str(e)}'})

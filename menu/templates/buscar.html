@@ -1,143 +1,129 @@
-<html>
-    {% load static %}
-    <head>
-        <title>{% block title %}BiciCenter - Tu Centro de Bicicletas Favorito{% endblock %}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/master.css' %}">
-        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    </head>
-    <body class="d-flex flex-column min-vh-100">
+{% extends 'master.html' %}
+{% load static %}
 
-   <header>
-    <div class="header-top">
-        <div class="container-fluid d-flex justify-content-between align-items-center px-4">
-            <a class="navbar-brand flex-shrink-0" href="{% url 'master' %}">
-                <img src="{% static 'img/biciCenter.png' %}" alt="BiciCenter" class="logo-rectangular">
-            </a>
-            <form class="d-flex search-bar mx-auto" role="search" method="GET" action="{% url 'buscar' %}">
-                <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar" required>
-                <button class="btn btn-outline-primary" type="submit">Buscar</button>
+{% block title %}Resultados de Búsqueda - BiciCenter{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    {% if query %}
+        <h2 class="mb-4">Resultados de búsqueda para: "{{ query }}"</h2>
+        
+        <!-- Sección de Filtros -->
+        <div class="filter-section">
+            <h5>🔍 Ordenar Resultados</h5>
+            <form method="GET" action="{% url 'buscar' %}" class="filter-form">
+                <input type="hidden" name="q" value="{{ query }}">
+                <div class="filter-group">
+                    <label for="ordenar">Ordenar por:</label>
+                    <select name="ordenar" id="ordenar">
+                        <option value="">Seleccionar...</option>
+                        <option value="nombre_asc" {% if request.GET.ordenar == 'nombre_asc' %}selected{% endif %}>Nombre (A-Z)</option>
+                        <option value="nombre_desc" {% if request.GET.ordenar == 'nombre_desc' %}selected{% endif %}>Nombre (Z-A)</option>
+                        <option value="precio_asc" {% if request.GET.ordenar == 'precio_asc' %}selected{% endif %}>Precio (Menor a Mayor)</option>
+                        <option value="precio_desc" {% if request.GET.ordenar == 'precio_desc' %}selected{% endif %}>Precio (Mayor a Menor)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter btn-apply">Aplicar</button>
+                    <a href="{% url 'buscar' %}?q={{ query }}" class="btn-filter btn-clear">Limpiar</a>
+                </div>
             </form>
-            <div class="flex-shrink-0">
-                 {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}?next={{ request.path }}" class="btn btn-light">
-                        Cerrar Sesión
-                    </a>
-                {% else %}
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
-                        Usuario
-                    </button>
-                {% endif %}
-            </div>
         </div>
-    </div>
-    <div class="header-bottom">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    {% if user.is_authenticated %}
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'registrobici' %}">Agenda tu Cita</a>
-        </li>
+        
+        {% if bicicletas or accesorios or repuestos %}
+            <div class="results-info">
+                📊 Se encontraron <strong>{{ total_resultados }}</strong> resultado{{ total_resultados|pluralize }}
+            </div>
+            
+            <!-- Sección de Bicicletas -->
+            {% if bicicletas %}
+                <h3 class="mt-5 mb-3">Bicicletas ({{ bicicletas|length }})</h3>
+                <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                    {% for bici in bicicletas %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            {% if bici.imagen %}
+                                <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ bici.nombre }} - {{ bici.modelo }}</h5>
+                                <p class="card-text">{{ bici.descripcion|truncatewords:15 }}</p>
+                                <p class="card-text text-success fw-bold">${{ bici.precio }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Sección de Accesorios -->
+            {% if accesorios %}
+                <h3 class="mt-5 mb-3">Accesorios ({{ accesorios|length }})</h3>
+                <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                    {% for accesorio in accesorios %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            {% if accesorio.imagen %}
+                                <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ accesorio.nombre }}</h5>
+                                <p class="card-text">{{ accesorio.descripcion|truncatewords:15 }}</p>
+                                <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Sección de Repuestos -->
+            {% if repuestos %}
+                <h3 class="mt-5 mb-3">Repuestos ({{ repuestos|length }})</h3>
+                <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                    {% for repuesto in repuestos %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            {% if repuesto.imagen %}
+                                <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ repuesto.nombre }}</h5>
+                                <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
+                                <p class="card-text text-success fw-bold">${{ repuesto.precio }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Mensaje cuando no hay resultados -->
+            <div class="alert alert-info text-center my-5" role="alert">
+                <h4 class="alert-heading">¡No se encontraron resultados!</h4>
+                <p>No encontramos productos que coincidan con tu búsqueda "{{ query }}".</p>
+                <hr>
+                <p class="mb-0">Intenta con otras palabras clave o explora nuestras categorías:</p>
+                <div class="mt-3">
+                    <a href="{% url 'bicicletas' %}" class="btn btn-primary me-2">Ver Bicicletas</a>
+                    <a href="{% url 'accesorios' %}" class="btn btn-primary me-2">Ver Accesorios</a>
+                    <a href="{% url 'repuestos' %}" class="btn btn-primary">Ver Repuestos</a>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- Mensaje cuando no hay búsqueda -->
+        <div class="alert alert-warning text-center my-5" role="alert">
+            <h4 class="alert-heading">Búsqueda vacía</h4>
+            <p>Por favor, ingresa un término de búsqueda para encontrar productos.</p>
+        </div>
     {% endif %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'bicicletas' %}">Bicicletas</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'repuestos' %}">Repuestos</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'accesorios' %}">Accesorios</a>
-    </li>
-</ul>
 </div>
-            </div>
-        </nav>
-    </div>
-</header>
-
-    <main class="flex-grow-1">
-        {% block content %}
-        <a href="{% url 'bicicletas' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Bicicletas</a>
-        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-            {% for bici in bicicletas %}
-            <div class="col">
-                <div class="card h-100 product-card">
-                    {% if bici.imagen %}
-                        <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
-                    {% else %}
-                        <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ bici.nombre }} - {{ bici.modelo }}</h5>
-                        <p class="card-text text-success">${{ bici.precio }}</p>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No hay bicicletas registradas.</p>
-            {% endfor %}
-        </div>
-
-        <a href="{% url 'accesorios' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Accesorios</a>
-        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-            {% for accesorio in accesorios %}
-            <div class="col">
-                <div class="card h-100 product-card">
-                    {% if accesorio.imagen %}
-                        <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
-                    {% else %}
-                        <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ accesorio.nombre }}</h5>
-                        <p class="card-text">{{ accesorio.descripcion|truncatewords:15 }}</p>
-                        <p class="card-text text-success">${{ accesorio.precio }}</p>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No hay accesorios registrados.</p>
-            {% endfor %}
-        </div>
-
-        <a href="{% url 'repuestos' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Repuestos</a>
-        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-            {% for repuesto in repuestos %}
-            <div class="col">
-                <div class="card h-100 product-card">
-                    {% if repuesto.imagen %}
-                        <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
-                    {% else %}
-                        <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ repuesto.nombre }}</h5>
-                        <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
-                        <p class="card-text text-success">${{ repuesto.precio }}</p>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No hay repuestos registrados.</p>
-            {% endfor %}
-        </div>
-        {% endblock %}
-    </main>
-
-    <footer>
-        <div class="footer-content text-center py-3">
-            <p class="mb-0">&copy; 2024 BiciCenter. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    {% include 'modal.html' %}
-
-    </body>
-</html>
+{% endblock %}

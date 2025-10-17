@@ -6,8 +6,38 @@
 {% block content %}
 <div class="container my-5">
     <h2 class="mb-4">Accesorios</h2>
+    
+    <!-- Sección de Filtros -->
+    <div class="filter-section">
+        <h5>🔍 Filtrar y Ordenar</h5>
+        <form method="GET" action="{% url 'accesorios' %}" class="filter-form">
+            <div class="filter-group">
+                <label for="ordenar">Ordenar por:</label>
+                <select name="ordenar" id="ordenar">
+                    <option value="">Seleccionar...</option>
+                    <option value="nombre_asc" {% if request.GET.ordenar == 'nombre_asc' %}selected{% endif %}>Nombre (A-Z)</option>
+                    <option value="nombre_desc" {% if request.GET.ordenar == 'nombre_desc' %}selected{% endif %}>Nombre (Z-A)</option>
+                    <option value="precio_asc" {% if request.GET.ordenar == 'precio_asc' %}selected{% endif %}>Precio (Menor a Mayor)</option>
+                    <option value="precio_desc" {% if request.GET.ordenar == 'precio_desc' %}selected{% endif %}>Precio (Mayor a Menor)</option>
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter btn-apply">Aplicar Filtros</button>
+                <a href="{% url 'accesorios' %}" class="btn-filter btn-clear">Limpiar</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if accesorios %}
+        <div class="results-info">
+            📊 Mostrando <strong>{{ accesorios|length }}</strong> accesorio{{ accesorios|length|pluralize }}
+        </div>
+    {% endif %}
+    
+    <!-- Lista de Productos -->
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-         {% for accesorio in accesorios %}
+        {% for accesorio in accesorios %}
         <div class="col">
             <div class="card h-100 product-card">
                 {% if accesorio.imagen %}
@@ -18,12 +48,17 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ accesorio.nombre }}</h5>
                     <p class="card-text">{{ accesorio.descripcion|truncatewords:15 }}</p>
-                    <p class="card-text text-success">${{ accesorio.precio }}</p>
+                    <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p>No hay accesorios registrados.</p>
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h5>No hay accesorios disponibles</h5>
+                <p><a href="{% url 'accesorios' %}">Ver todos los accesorios</a></p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </div>
