@@ -37,29 +37,32 @@
     
     <!-- Lista de Productos -->
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-        {% for accesorio in accesorios %}
-        <div class="col">
-            <div class="card h-100 product-card">
+    {% for accesorio in accesorios %}
+    <div class="col">
+        <div class="card h-100 product-card">
+            <a href="{% url 'producto_detalle' 'accesorio' accesorio.id %}" class="text-decoration-none">
                 {% if accesorio.imagen %}
                     <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
                 {% else %}
                     <img src="{% static 'img/default.jpg' %}" class="card-img-top" alt="Sin imagen">
                 {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">{{ accesorio.nombre }}</h5>
-                    <p class="card-text">{{ accesorio.descripcion|truncatewords:15 }}</p>
+                    <h5 class="card-title text-dark">{{ accesorio.nombre }}</h5>
+                    <p class="card-text text-muted">{{ accesorio.descripcion|truncatewords:15 }}</p>
                     <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
                 </div>
-            </div>
+            </a>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h5>No hay accesorios disponibles</h5>
-                <p><a href="{% url 'accesorios' %}">Ver todos los accesorios</a></p>
-            </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h5>No hay accesorios disponibles</h5>
+            <p><a href="{% url 'accesorios' %}">Ver todos los accesorios</a></p>
         </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
     </div>
 </div>
+
 {% endblock %}

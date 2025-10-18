@@ -37,29 +37,31 @@
     
     <!-- Lista de Productos -->
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-        {% for repuesto in repuestos %}
-        <div class="col">
-            <div class="card h-100 product-card">
+    {% for repuesto in repuestos %}
+    <div class="col">
+        <div class="card h-100 product-card">
+            <a href="{% url 'producto_detalle' 'repuesto' repuesto.id %}" class="text-decoration-none">
                 {% if repuesto.imagen %}
                     <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
                 {% else %}
                     <img src="{% static 'img/default.jpg' %}" class="card-img-top" alt="Sin imagen">
                 {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">{{ repuesto.nombre }}</h5>
-                    <p class="card-text">{{ repuesto.descripcion|truncatewords:15 }}</p>
+                    <h5 class="card-title text-dark">{{ repuesto.nombre }}</h5>
+                    <p class="card-text text-muted">{{ repuesto.descripcion|truncatewords:15 }}</p>
                     <p class="card-text text-success fw-bold">${{ repuesto.precio }}</p>
                 </div>
-            </div>
+            </a>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h5>No hay repuestos disponibles</h5>
-                <p><a href="{% url 'repuestos' %}">Ver todos los repuestos</a></p>
-            </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h5>No hay repuestos disponibles</h5>
+            <p><a href="{% url 'repuestos' %}">Ver todos los repuestos</a></p>
         </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
     </div>
 </div>
 {% endblock %}
