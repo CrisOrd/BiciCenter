@@ -106,7 +106,6 @@ class Cliente(models.Model):
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
 
-
 class BicicletaCliente(models.Model):
     MARCAS = [
         ('trek', 'Trek'),
@@ -119,7 +118,6 @@ class BicicletaCliente(models.Model):
         ('merida', 'Merida'),
         ('other', 'Otra'),
     ]
-
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     marca = models.CharField(max_length=50, choices=MARCAS)
     color = models.CharField(max_length=20, choices=COLORES)
@@ -130,7 +128,6 @@ class BicicletaCliente(models.Model):
 
     def __str__(self):
         return f"{self.get_marca_display()} {self.get_color_display()} - {self.cliente}"
-
 
 class ServicioMantenimiento(models.Model):
     SERVICIOS = [

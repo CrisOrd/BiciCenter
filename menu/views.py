@@ -45,7 +45,6 @@ def inicioPage(request):
 
     return render(request, 'inicioSesion.html')
 
-
 def registroPage(request):
     if request.user.is_authenticated:
         return redirect('master')
@@ -366,12 +365,14 @@ def agendar_cita(request):
 @login_required
 def mantemientoPage(request):
     user = request.user
-    try:
-        cliente_data = Cliente.objects.get(email=user.email)
-        bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
-    except Cliente.DoesNotExist:
+    
+    cliente_qs = Cliente.objects.filter(email=user.email)
+    cliente_data = cliente_qs.first()
+    if not cliente_data:
         messages.error(request, 'Debes completar tu perfil primero.')
         return redirect('registrobici')
+
+    bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
     
     if not bicicleta_data:
         messages.error(request, 'Debes registrar tu bicicleta primero.')
@@ -399,18 +400,18 @@ def mantemientoPage(request):
                         )
                     except ServicioMantenimiento.DoesNotExist:
                         continue
+
                 orden.calcular_totales()
                 messages.success(request, f'¡Orden #{orden.id} creada exitosamente! Total: ${orden.total}')
-                return redirect('mantenimiento')           
+                return redirect('master') 
             except Exception as e:
                 messages.error(request, f'Error al crear la orden: {e}')
-    
     context = {
         'user': user,
         'cliente': cliente_data,
         'bicicleta': bicicleta_data,
         'servicios': ServicioMantenimiento.objects.all()
-    } 
+    }
     return render(request, 'mantenimiento.html', context)
 
 @login_required

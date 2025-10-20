@@ -25,7 +25,7 @@
             {% endfor %}
         {% endif %}
         
-        <form method="POST">
+        <form method="POST" id="registroForm"> 
     {% csrf_token %}
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
@@ -88,21 +88,21 @@
         </select>
     </div>
     <div class="input-box">
-        <i class="bi bi-calendar"></i>
-        <input type="number" name="bike_year" min="1980" max="2025" placeholder="Año (opcional)">
-    </div>
-    <div class="input-box">
-        <i class="bi bi-chat-dots"></i>
-        <textarea name="additional_notes" placeholder="Notas adicionales (opcional)"></textarea>
-    </div>
+    <i class="bi bi-calendar"></i>
+    <select name="bike_year" id="bike_year_select" required>
+        <option value="">Año de la bicicleta</option>
+    </select>
+</div>
     <button type="submit" class="btn-register" id="submitBtn">
         <i class="bi bi-check-circle"></i> Agendar Cita
     </button>
 </form>
+        <button type="button" class="btn-cancel" id="cancelBtn">
+            <i class="bi bi-x-circle"></i> Cancelar Cita
+        </button>
     </div>
 
     <script>
-        // Formatear RUT mientras se escribe
         document.getElementById('rut').addEventListener('input', function() {
             let rut = this.value.replace(/[^0-9kK]/g, '');
             if (rut.length > 1) {
@@ -110,14 +110,10 @@
             }
             this.value = rut.toUpperCase();
         });
-
-        // Debug: Interceptar el submit del formulario
         document.getElementById('registroForm').addEventListener('submit', function(e) {
             console.log('=== FORMULARIO ENVIÁNDOSE ===');
-            
-            // Verificar que todos los campos obligatorios estén llenos
-            const requiredFields = [
-                'first_name', 'last_name', 'rut', 'email', 'phone', 
+          const requiredFields = [
+                'nombre', 'apellido', 'rut', 'email', 
                 'bike_brand', 'bike_color', 'bike_type'
             ];
             
@@ -129,11 +125,9 @@
                 console.log(`${field}: "${value}"`);
                 if (!value || value.trim() === '') {
                     allFieldsFilled = false;
-                    console.log(`⚠️  Campo vacío: ${field}`);
+                    console.log(`Campo vacío: ${field}`);
                 }
             }
-            
-            // Mostrar todos los datos que se van a enviar
             console.log('=== TODOS LOS DATOS DEL FORMULARIO ===');
             for (let [key, value] of formData.entries()) {
                 console.log(`${key}: "${value}"`);
@@ -144,14 +138,34 @@
                 e.preventDefault();
                 return false;
             }
-            
-            // Deshabilitar el botón para evitar envíos múltiples
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
             
-            console.log('✅ Formulario válido, enviando...');
+            console.log('Formulario válido, enviando...');
         });
+
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que deseas CANCELAR la cita y volver a la página principal?')) {
+                window.location.href = "{% url 'master' %}";
+            }
+        });
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que deseas CANCELAR la cita y volver a la página principal?')) {
+                window.location.href = "{% url 'master' %}";
+            }
+        });
+        const yearSelect = document.getElementById('bike_year_select');
+        const startYear = 1985;
+        const endYear = 2025;
+
+        for (let year = endYear; year >= startYear; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+    </script>
     </script>
 </body>
 </html>

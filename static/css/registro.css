@@ -8,7 +8,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(153deg, rgb(0,168,0), rgb(25,25,112), rgb(0,168,0), rgb(25,25,112));
+    background: linear-gradient(153deg,  rgb(39, 224, 2), rgb(2, 120, 199), rgb(39, 224, 2), rgb(2, 120, 199));
     background-size: 300% 100%;
     animation: smooth-cycle 5s infinite linear;
     font-family: 'Poppins', sans-serif;

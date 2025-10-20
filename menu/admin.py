@@ -1,4 +1,3 @@
-# admin.py
 from django.contrib import admin
 from .models import (Bicicleta, Repuesto, Accesorio, Cliente, BicicletaCliente,
                      ServicioMantenimiento, OrdenMantenimiento, ItemOrdenMantenimiento)
@@ -25,14 +24,12 @@ class ClienteAdmin(admin.ModelAdmin):
 
 @admin.register(BicicletaCliente)
 class BicicletaClienteAdmin(admin.ModelAdmin):
-    # Campos corregidos para coincidir con models.py
     list_display = ('cliente', 'marca', 'color', 'tipo')
     search_fields = ('cliente__nombre', 'marca', 'color', 'tipo')
     list_filter = ('tipo',)
 
 @admin.register(ServicioMantenimiento)
 class ServicioMantenimientoAdmin(admin.ModelAdmin):
-    # Campos corregidos para coincidir con models.py
     list_display = ('nombre', 'precio')
     search_fields = ('nombre',)
 

@@ -5,10 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # Admin
     path('admin/', admin.site.urls),
-    
-    # Autenticación
     path('inicioSesion/', views.inicioPage, name='inicioSesion'),
     path('registro/', views.registroPage, name='registro'),
     path('logout/', views.logoutUser, name='logout'),

@@ -27,7 +27,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -72,7 +72,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Año</label>
                                     <input type="text" class="form-control" 
-                                           value="{% if bicicleta.año %}{{ bicicleta.año }}{% else %}No especificado{% endif %}" readonly>
+                                           value="{% if bicicleta.anio %}{{ bicicleta.anio }}{% else %}No especificado{% endif %}" readonly>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -103,24 +103,29 @@
                             <div class="row mb-4">
                                 {% for servicio in servicios %}
                                 <div class="col-md-6 mb-3">
-                                    <div class="service-item">
+                                    <div class="service-item p-2 border rounded">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h6 class="mb-1">{{ servicio.get_nombre_display }}</h6>
-                                                <small class="text-muted">{{ servicio.descripcion|truncatewords:10 }}</small>
+                                                {% if servicio.descripcion %}
+                                                    <small class="text-muted">{{ servicio.descripcion|truncatewords:12 }}</small>
+                                                {% endif %}
                                             </div>
                                             <div class="d-flex align-items-center">
-                                                <span class="price me-3">${{ servicio.precio|floatformat:0 }}</span>
+                                                <span class="price me-3">{{ servicio.precio_chileno }}</span>
                                                 <input type="checkbox" class="form-check-input service" 
                                                        name="servicios" value="{{ servicio.nombre }}" 
-                                                       data-price="{{ servicio.precio }}">
+                                                       data-price="{{ servicio.precio|floatformat:2 }}">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <p class="text-muted">No hay servicios registrados. Por favor crea servicios en el admin.</p>
+                                </div>
                                 {% endfor %}
                             </div>
-
                             <div class="total-section">
                                 <div class="row">
                                     <div class="col-md-8">
@@ -134,7 +139,10 @@
                                             <strong>Total:</strong> <span id="total">$0</span>
                                         </div>
                                         <button type="submit" class="btn-finish" id="submitBtn">
-                                            Crear Orden de Mantenimiento
+                                            <i class="bi bi-cart-check"></i> Crear Orden de Mantenimiento
+                                        </button>
+                                        <button type="button" class="btn-cancel" id="cancelMaintBtn">
+                                            <i class="bi bi-x-circle"></i> Cancelar Mantenimiento
                                         </button>
                                     </div>
                                 </div>
@@ -146,6 +154,8 @@
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+    
     <script>
         const checkboxes = document.querySelectorAll(".service");
         const subtotalEl = document.getElementById("subtotal");
@@ -153,56 +163,50 @@
         const totalEl = document.getElementById("total");
         let subtotal = 0;
         const ivaRate = 0.19;
-
+        function formatPrice(number) {
+            return `$${Math.round(number).toLocaleString("es-CL")}`;
+        }
         function updateTotals() {
             const iva = subtotal * ivaRate;
             const total = subtotal + iva;
-            subtotalEl.textContent = `$${subtotal.toLocaleString("es-CL")}`;
-            ivaEl.textContent = `$${Math.round(iva).toLocaleString("es-CL")}`;
-            totalEl.textContent = `$${Math.round(total).toLocaleString("es-CL")}`;
+            subtotalEl.textContent = formatPrice(subtotal);
+            ivaEl.textContent = formatPrice(iva);
+            totalEl.textContent = formatPrice(total);
         }
 
         checkboxes.forEach(cb => {
             cb.addEventListener("change", () => {
-                const price = parseFloat(cb.getAttribute("data-price"));
+                const price = parseFloat(cb.getAttribute("data-price")); 
                 if (cb.checked) {
                     subtotal += price;
                 } else {
                     subtotal -= price;
                 }
+              subtotal = Math.max(0, subtotal);
                 updateTotals();
             });
         });
-
-        // Validar formulario antes de enviar
         document.getElementById('mantenimientoForm').addEventListener('submit', function(e) {
             const selectedServices = document.querySelectorAll('input[name="servicios"]:checked');
-            
-            if (selectedServices.length === 0) {
+           if (selectedServices.length === 0) {
                 e.preventDefault();
-                alert('Por favor, selecciona al menos un servicio');
+                alert('Por favor, selecciona al menos un servicio para crear la orden de mantenimiento.');
                 return false;
             }
-
-            // Deshabilitar el botón para evitar envíos múltiples
-            const submitBtn = document.getElementById('submitBtn');
+           const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Procesando...';
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
         });
+
+        document.getElementById('cancelMaintBtn').addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que deseas CANCELAR la creación de la Orden de Mantenimiento? Esto te redirigirá a la página principal.')) {
+              window.location.href = "{% url 'master' %}";
+            }
+        });
+        document.addEventListener('DOMContentLoaded', updateTotals);
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Formatear RUT mientras se escribe (solo si no está readonly)
-        const rutInput = document.getElementById('rut');
-        if (!rutInput.readOnly) {
-            rutInput.addEventListener('input', function() {
-                let rut = this.value.replace(/[^0-9kK]/g, '');
-                if (rut.length > 1) {
-                    rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
-                }
-                this.value = rut.toUpperCase();
-            });
-        }
-    </script>
+
 </body>
 </html>
