@@ -31,38 +31,47 @@ def inicioPage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        next_url = request.POST.get('next', 'master')
         
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
             login(request, user)
             messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
-            return redirect('master')  # Redirige al master
+            return redirect(next_url)
         else:
             messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+            return render(request, 'inicioSesion.html')
 
     return render(request, 'inicioSesion.html')
+
 
 def registroPage(request):
     if request.user.is_authenticated:
         return redirect('master')
+
     if request.method == 'POST':
-        nombre = request.POST.get('first_name')
-        apellido = request.POST.get('last_name')
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
         username = request.POST.get('username')
         email = request.POST.get('email')
         rut = request.POST.get('rut')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
+        next_url = request.POST.get('next', 'master')
+
         if password != password2:
             messages.error(request, 'Las contraseñas no coinciden.')
             return render(request, 'registro.html')
+
         if User.objects.filter(username=username).exists():
             messages.error(request, 'El nombre de usuario ya está en uso.')
             return render(request, 'registro.html')
+
         if Cliente.objects.filter(rut=rut).exists():
             messages.error(request, 'El RUT ya se encuentra registrado.')
             return render(request, 'registro.html')
+
         try:
             user = User.objects.create_user(
                 username=username, 
@@ -77,16 +86,20 @@ def registroPage(request):
                 apellido=apellido, 
                 email=email
             )
+
             user_auth = authenticate(request, username=username, password=password)
             if user_auth is not None:
                 login(request, user_auth)
                 messages.success(request, f'¡Bienvenido, {user.first_name}! Tu cuenta ha sido creada exitosamente.')
-                return redirect('master')  # Redirige al master
+                return redirect(next_url)
             else:
-                messages.success(request, 'Cuenta creada exitosamente. Por favor inicia sesión.')
+                messages.error(request, 'Cuenta creada, pero no se pudo iniciar sesión. Inicia sesión manualmente.')
                 return redirect('inicioSesion')
+
         except Exception as e:
             messages.error(request, f'Ocurrió un error al registrar: {e}')
+            return render(request, 'registro.html')
+
     return render(request, 'registro.html')
 
 def logoutUser(request):
