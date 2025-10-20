@@ -6,7 +6,6 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/vistaProducto.css' %}">
 <div class="container my-5">
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'master' %}">Inicio</a></li>
@@ -16,7 +15,6 @@
     </nav>
 
     <div class="row">
-        <!-- Columna de Imagen -->
         <div class="col-md-6">
             <div class="product-image-container">
                 {% if producto.imagen %}
@@ -26,38 +24,30 @@
                 {% endif %}
             </div>
         </div>
-
-        <!-- Columna de Información -->
         <div class="col-md-6">
             <div class="product-info">
                 <!-- Título -->
                 <h1 class="product-title mb-3">{{ producto.nombre }}</h1>
                 
-                <!-- Modelo (solo para bicicletas) -->
                 {% if producto.modelo %}
                     <p class="text-muted mb-2">Modelo: <strong>{{ producto.modelo }}</strong></p>
                 {% endif %}
 
-                <!-- Tipo (solo para bicicletas) -->
                 {% if producto.tipo_bicicleta %}
                     <p class="text-muted mb-3">Tipo: <span class="badge bg-secondary">{{ producto.tipo_bicicleta }}</span></p>
                 {% endif %}
 
-                <!-- Precio -->
                 <div class="product-price mb-4">
                     <h2 class="text-success fw-bold mb-0">${{ producto.precio }}</h2>
                 </div>
 
-                <!-- Descripción -->
                 <div class="product-description mb-4">
                     <h5 class="mb-3">Descripción del producto</h5>
                     <p class="text-muted">{{ producto.descripcion }}</p>
                 </div>
 
-                <!-- Botones de Acción -->
                 <div class="product-actions">
                     {% if user.is_authenticated %}
-                        <!-- Formulario para Agregar al Carrito -->
                         <form method="GET" action="{% url 'agregar_al_carrito' tipo_producto|lower producto.id %}" class="mb-3">
                             <button type="submit" class="btn btn-primary btn-lg w-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart-plus me-2" viewBox="0 0 16 16">
@@ -68,7 +58,6 @@
                             </button>
                         </form>
                         
-                        <!-- Formulario para Comprar Ahora -->
                         <form method="GET" action="{% url 'comprar_ahora' tipo_producto|lower producto.id %}">
                             <button type="submit" class="btn btn-outline-primary btn-lg w-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lightning-charge me-2" viewBox="0 0 16 16">
@@ -78,7 +67,6 @@
                             </button>
                         </form>
                     {% else %}
-                        <!-- Mensaje para usuarios no autenticados -->
                         <div class="alert alert-info">
                             <p class="mb-3"><i class="bi bi-info-circle"></i> <strong>Debes iniciar sesión para comprar este producto</strong></p>
                             <div class="d-grid gap-2">
@@ -93,7 +81,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Información Adicional -->
                 <div class="additional-info mt-4">
                     <div class="info-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
@@ -119,7 +106,6 @@
         </div>
     </div>
 
-    <!-- Productos Relacionados -->
     <div class="related-products mt-5">
         <h3 class="mb-4">Productos Relacionados</h3>
         <div class="row row-cols-1 row-cols-md-4 g-4">

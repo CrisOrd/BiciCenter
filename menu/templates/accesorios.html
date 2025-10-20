@@ -6,10 +6,7 @@
 {% block content %}
 <div class="container my-5">
     <h2 class="mb-4">Accesorios</h2>
-    
-    <!-- Sección de Filtros -->
     <div class="filter-section">
-        <h5>🔍 Filtrar y Ordenar</h5>
         <form method="GET" action="{% url 'accesorios' %}" class="filter-form">
             <div class="filter-group">
                 <label for="ordenar">Ordenar por:</label>
@@ -29,13 +26,6 @@
         </form>
     </div>
     
-    {% if accesorios %}
-        <div class="results-info">
-            📊 Mostrando <strong>{{ accesorios|length }}</strong> accesorio{{ accesorios|length|pluralize }}
-        </div>
-    {% endif %}
-    
-    <!-- Lista de Productos -->
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
     {% for accesorio in accesorios %}
     <div class="col">
@@ -49,7 +39,7 @@
                 <div class="card-body">
                     <h5 class="card-title text-dark">{{ accesorio.nombre }}</h5>
                     <p class="card-text text-muted">{{ accesorio.descripcion|truncatewords:15 }}</p>
-                    <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
+                    <p class="card-text text-success fw-bold">{{ accesorio.precio_chileno }}</p>
                 </div>
             </a>
         </div>

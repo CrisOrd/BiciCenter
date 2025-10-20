@@ -13,10 +13,12 @@
 <body>
     <div class="card p-4" style="width: 100%; max-width: 380px;">
     <div class="text-center">
-        <img src="{% static 'img/biciCenter.png' %}" alt="Logo" class="logo">
-        <h3 class="fw-bold mb-3">Bienvenido</h3>
-        <p class="text-muted">Inicia sesión para continuar</p>
-    </div>
+    <a href="{% url 'master' %}">
+        <img src="{% static 'img/biciCenter.png' %}" alt="Logo" class="logo" style="cursor: pointer;">
+    </a>
+    <h3 class="fw-bold mb-3">Bienvenido</h3>
+    <p class="text-muted">Inicia sesión para continuar</p>
+</div>
    <form method="POST">
     {% csrf_token %}
     <div class="mb-3 input-group">

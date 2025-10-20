@@ -13,18 +13,12 @@ urlpatterns = [
     path('registro/', views.registroPage, name='registro'),
     path('logout/', views.logoutUser, name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
-    
-    # Página Principal
     path('', views.MasterListView.as_view(), name='master'),
-    
-    # Productos con Filtros
     path('bicicletas/', views.BicicletasListView, name='bicicletas'), 
     path('repuestos/', views.RepuestosListView, name='repuestos'),
     path('accesorios/', views.AccesoriosListView, name='accesorios'),
     path('buscar/', views.Buscar, name='buscar'),
     path('producto/<str:tipo>/<int:id>/', views.producto_detalle, name='producto_detalle'),
-    
-    # Carrito de Compras - AGREGADO
     path('carrito/', views.carrito, name='carrito'),
     path('agregar-al-carrito/<str:tipo>/<int:id>/', views.agregar_al_carrito, name='agregar_al_carrito'),
     path('eliminar-del-carrito/<int:item_id>/', views.eliminar_del_carrito, name='eliminar_del_carrito'),
@@ -32,8 +26,6 @@ urlpatterns = [
     path('comprar-ahora/<str:tipo>/<int:id>/', views.comprar_ahora, name='comprar_ahora'),
     path('vaciar-carrito/', views.vaciar_carrito, name='vaciar_carrito'),
     path('proceder-al-pago/', views.proceder_al_pago, name='proceder_al_pago'),
-    
-    # Gestión de Bicicletas y Mantenimiento
     path('registrobici/', views.agendar_cita, name='registrobici'),
     path('agendar_cita/', views.agendar_cita, name='agendar_cita'),
     path('mantenimiento/', views.mantemientoPage, name='mantenimiento'),
