@@ -1,10 +1,19 @@
+@keyframes smooth-cycle {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
 body {
-	min-height: 100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: linear-gradient(153deg, rgb(0,168,0), rgb(25,25,112));
-	font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(153deg,  rgb(39, 224, 2), rgb(2, 120, 199), rgb(39, 224, 2), rgb(2, 120, 199));
+    background-size: 300% 100%;
+    animation: smooth-cycle 5s infinite linear;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 15px;
 }
 .wrapper {
 	max-width: 430px;
@@ -49,8 +58,8 @@ body {
 .input-box input:focus,
 .input-box select:focus,
 .input-box textarea:focus {
-	border-color: #4facfe;
-	box-shadow: 0 0 0 3px rgba(79,172,254,0.2);
+	border-color: #00a800; 
+	box-shadow: 0 0 0 3px rgba(0,168,0,0.2);
 }
 .input-box i {
 	position: absolute;
@@ -60,18 +69,34 @@ body {
 	font-size: 18px;
 	color: #666;
 }
+.btn-register, .btn-cancel {
+    width: 100%;
+    border: none;
+    padding: 12px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-top: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 .btn-register {
-	width: 100%;
-	background: linear-gradient(90deg, #4facfe, #00f2fe);
-	border: none;
-	padding: 12px;
-	border-radius: 50px;
-	color: #fff;
-	font-weight: 600;
-	transition: 0.3s;
-	margin-top: 10px;
+    background: rgb(0,168,0); 
 }
 .btn-register:hover {
-	opacity: 0.9;
-	transform: translateY(-2px);
+    background: rgb(0,140,0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,168,0,0.4);
+}
+
+.btn-cancel {
+    background: #e74c3c; 
+    margin-top: 5px;
+}
+.btn-cancel:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231,76,60,0.4);
 }

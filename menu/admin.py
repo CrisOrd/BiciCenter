@@ -1,8 +1,7 @@
-# admin.py
 from django.contrib import admin
 from .models import (Bicicleta, Repuesto, Accesorio, Cliente, BicicletaCliente,
                      ServicioMantenimiento, OrdenMantenimiento, ItemOrdenMantenimiento)
-
+from .models import CarritoItem
 @admin.register(Bicicleta)
 class BicicletaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'modelo', 'precio')
@@ -25,14 +24,12 @@ class ClienteAdmin(admin.ModelAdmin):
 
 @admin.register(BicicletaCliente)
 class BicicletaClienteAdmin(admin.ModelAdmin):
-    # Campos corregidos para coincidir con models.py
     list_display = ('cliente', 'marca', 'color', 'tipo')
     search_fields = ('cliente__nombre', 'marca', 'color', 'tipo')
     list_filter = ('tipo',)
 
 @admin.register(ServicioMantenimiento)
 class ServicioMantenimientoAdmin(admin.ModelAdmin):
-    # Campos corregidos para coincidir con models.py
     list_display = ('nombre', 'precio')
     search_fields = ('nombre',)
 
@@ -46,3 +43,14 @@ class OrdenMantenimientoAdmin(admin.ModelAdmin):
 class ItemOrdenMantenimientoAdmin(admin.ModelAdmin):
     list_display = ('orden', 'servicio', 'precio')
     search_fields = ('orden__cliente__nombre', 'servicio__nombre')
+
+@admin.register(CarritoItem)
+class CarritoItemAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'tipo_producto', 'producto_id', 'cantidad', 'fecha_agregado', 'get_subtotal')
+    list_filter = ('tipo_producto', 'fecha_agregado')
+    search_fields = ('usuario__username', 'usuario__email')
+    readonly_fields = ('fecha_agregado',)
+    
+    def get_subtotal(self, obj):
+        return f"${obj.get_subtotal()}"
+    get_subtotal.short_description = 'Subtotal'

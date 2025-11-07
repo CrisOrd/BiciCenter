@@ -1,0 +1,47 @@
+[
+  {
+    "model": "menu.serviciomantenimiento",
+    "pk": 1,
+    "fields": {
+      "nombre": "pastillas_freno",
+      "descripcion": "Cambio pastillas freno",
+      "precio": "10000.00"
+    }
+  },
+  {
+    "model": "menu.serviciomantenimiento",
+    "pk": 2,
+    "fields": {
+      "nombre": "lubricacion_cadena",
+      "descripcion": "Lubricación de cadena",
+      "precio": "5000.00"
+    }
+  },
+  {
+    "model": "menu.serviciomantenimiento",
+    "pk": 3,
+    "fields": {
+      "nombre": "centrado_ruedas",
+      "descripcion": "Centrado ruedas",
+      "precio": "12000.00"
+    }
+  },
+  {
+    "model": "menu.serviciomantenimiento",
+    "pk": 4,
+    "fields": {
+      "nombre": "cambio_ruedas_fundas",
+      "descripcion": "Cambio de ruedas y fundas",
+      "precio": "15000.00"
+    }
+  },
+  {
+    "model": "menu.serviciomantenimiento",
+    "pk": 5,
+    "fields": {
+      "nombre": "limpieza_profunda",
+      "descripcion": "Limpieza profunda",
+      "precio": "8000.00"
+    }
+  }
+]

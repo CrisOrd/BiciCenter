@@ -6,9 +6,11 @@
 {% block content %}
 <div class="container my-5">
     <h2 class="mb-4">Bicicletas</h2>
+<<<<<<< HEAD
     
+=======
+>>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
     <div class="filter-section">
-        <h5>🔍 Filtrar y Ordenar</h5>
         <form method="GET" action="{% url 'bicicletas' %}" class="filter-form">
             <div class="filter-group">
                 <label for="ordenar">Ordenar por:</label>
@@ -20,15 +22,17 @@
                     <option value="precio_desc" {% if request.GET.ordenar == 'precio_desc' %}selected{% endif %}>Precio (Mayor a Menor)</option>
                     <option value="modelo_asc" {% if request.GET.ordenar == 'modelo_asc' %}selected{% endif %}>Modelo (A-Z)</option>
                     <option value="modelo_desc" {% if request.GET.ordenar == 'modelo_desc' %}selected{% endif %}>Modelo (Z-A)</option>
+                    <option value="marca_asc" {% if request.GET.ordenar == 'marca_asc' %}selected{% endif %}>Marca (A-Z)</option>
+                    <option value="marca_desc" {% if request.GET.ordenar == 'marca_desc' %}selected{% endif %}>Marca (Z-A)</option>
                 </select>
             </div>
             
             <div class="filter-group">
-                <label for="tipo">Tipo de Bicicleta:</label>
-                <select name="tipo" id="tipo">
-                    <option value="">Todos los tipos</option>
-                    {% for tipo in tipos_disponibles %}
-                        <option value="{{ tipo }}" {% if request.GET.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                <label for="marca">Marca:</label>
+                <select name="marca" id="marca">
+                    <option value="">Todas las marcas</option>
+                    {% for marca in marcas_disponibles %}
+                        <option value="{{ marca }}" {% if request.GET.marca == marca %}selected{% endif %}>{{ marca }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -40,6 +44,7 @@
         </form>
     </div>
     
+<<<<<<< HEAD
     {% if bicicletas %}
         <div class="results-info">
             📊 Mostrando <strong>{{ bicicletas|length }}</strong> bicicleta{{ bicicletas|length|pluralize }}
@@ -50,26 +55,34 @@
         {% for bici in bicicletas %}
         <div class="col">
             <div class="card h-100 product-card">
+=======
+   <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+    {% for bici in bicicletas %}
+    <div class="col">
+        <div class="card h-100 product-card">
+            <a href="{% url 'producto_detalle' 'bicicleta' bici.id %}" class="text-decoration-none">
+>>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
                 {% if bici.imagen %}
                     <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
                 {% else %}
                     <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
                 {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">{{ bici.nombre }} - {{ bici.modelo }}</h5>
-                    <p class="card-text">{{ bici.descripcion|truncatewords:15 }}</p>
-                    <p class="card-text text-success fw-bold">${{ bici.precio }}</p>
+                    <h5 class="card-title text-dark">{{ bici.nombre }} - {{ bici.modelo }}</h5>
+                    <p class="card-text text-muted">{{ bici.descripcion|truncatewords:15 }}</p>
+                    <p class="card-text text-success fw-bold">{{ bici.precio_chileno }}</p>
                 </div>
-            </div>
+            </a>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h5>No hay bicicletas disponibles con los filtros seleccionados</h5>
-                <p>Intenta ajustar los filtros o <a href="{% url 'bicicletas' %}">ver todas las bicicletas</a></p>
-            </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h5>No hay bicicletas disponibles con los filtros seleccionados</h5>
+            <p>Intenta ajustar los filtros o <a href="{% url 'bicicletas' %}">ver todas las bicicletas</a></p>
         </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
     </div>
 </div>
 {% endblock %}

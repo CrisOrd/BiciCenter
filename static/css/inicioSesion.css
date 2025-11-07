@@ -1,29 +1,71 @@
-        body {
-            background: linear-gradient(122deg, rgb(25,25,112), rgb(0,168,0));
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Segoe UI", sans-serif;
-        }
-        .card {
-            border-radius: 1rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-        .form-control:focus {
-            border-color: black;
-            box-shadow: 0 0 0 0.2rem rgba(79,172,254,0.25);
-        }
-        .btn-primary {
-            background: linear-gradient(90deg, green, blue );
-            border: none;
-            transition: 0.3s;
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        .logo {
-            width: 80px;
-            margin-bottom: 1rem;
-        }
+@keyframes smooth-cycle {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+body {
+    background: linear-gradient(122deg,  rgb(39, 224, 2), rgb(2, 120, 199), rgb(39, 224, 2), rgb(2, 120, 199));
+    background-size: 300% 100%;
+    animation: smooth-cycle 5s infinite linear;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 15px;
+}
+
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    background: white;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+}
+
+.form-control {
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    border-color: rgb(25,25,112);
+    box-shadow: 0 0 0 0.2rem rgba(25,25,112,0.25);
+}
+
+.btn-primary {
+    background: rgb(25,25,112);
+    border: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: rgb(20,20,90);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25,25,112,0.4);
+}
+
+.logo {
+    width: 80px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.text-center a {
+    color: rgb(25,25,112);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}

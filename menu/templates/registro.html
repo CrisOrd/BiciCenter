@@ -10,23 +10,30 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/registro.css' %}">
 
-  <style>
-
-  </style>
 </head>
 <body>
   <div class="wrapper">
-    <img src="{% static 'img/biciCenter.png' %}" alt="Logo">
+    <a href="{% url 'master' %}">
+        <img src="{% static 'img/biciCenter.png' %}" alt="Logo" style="cursor: pointer;">
+    </a>
     <h2>Registro de Usuario</h2>
     <form method="POST">
     {% csrf_token %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" placeholder="Nombre" name="nombre" required>
+        <input type="text" placeholder="Nombre" name="first_name" required> 
     </div>
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" placeholder="Apellido" name="apellido" required>
+        <input type="text" placeholder="Apellido" name="last_name" required>
     </div>
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
@@ -38,7 +45,7 @@
     </div>
     <div class="input-box">
         <i class="bi bi-card-text"></i>
-        <input type="text" placeholder="RUT" name="rut" required>
+        <input type="text" placeholder="RUT" name="rut" id="rut" required>
     </div>
     <div class="input-box">
         <i class="bi bi-lock-fill"></i>
@@ -64,7 +71,10 @@
             rutInput.addEventListener('input', function() {
                 let rut = this.value.replace(/[^0-9kK]/g, '');
                 if (rut.length > 1) {
-                    rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
+                    const dv = rut.slice(-1); 
+                    let cuerpo = rut.slice(0, -1);
+                    cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    rut = cuerpo + '-' + dv;
                 }
                 this.value = rut.toUpperCase();
             });
