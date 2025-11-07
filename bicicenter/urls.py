@@ -12,6 +12,8 @@ urlpatterns = [
     path('inicioSesion/', views.inicioPage, name='inicioSesion'),
     path('registro/', views.registroPage, name='registro'),
     path('logout/', views.logoutUser, name='logout'),
+    # Asegurar que cualquier enlace a /accounts/logout/ use nuestra vista personalizada
+    path('accounts/logout/', views.logoutUser),
     path('accounts/', include('django.contrib.auth.urls')),
     
     # Página Principal
@@ -29,5 +31,7 @@ urlpatterns = [
     path('mantenimiento/', views.mantemientoPage, name='mantenimiento'),
     path('historial-mantenimientos/', views.historialMantenimientosPage, name='historial_mantenimientos'),
     path('finalizar-orden/', views.finalizar_orden, name='finalizar_orden'),
+    # Ruta alternativa para acceder al módulo 'menu'
+    path('menu/', views.MasterListView.as_view(), name='menu_home'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,9 +10,9 @@ from django.contrib.auth.decorators import login_required
 import json
 from decimal import Decimal
 from django.db.models import Q
-
-
-# ============= FUNCIONES AUXILIARES =============
+import datetime
+import re
+from django.utils.http import url_has_allowed_host_and_scheme
 
 def aplicar_ordenamiento(queryset, ordenar_por):
     """Función auxiliar para aplicar ordenamiento a un queryset"""
@@ -25,9 +25,6 @@ def aplicar_ordenamiento(queryset, ordenar_por):
         'modelo_desc': '-modelo',
     }
     return queryset.order_by(orden_map[ordenar_por]) if ordenar_por in orden_map else queryset
-
-
-# ============= AUTENTICACIÓN =============
 
 def inicioPage(request):
     """Vista para inicio de sesión"""
@@ -72,7 +69,6 @@ def registroPage(request):
         password2 = request.POST.get('password2')
         next_url = request.POST.get('next', 'master')
 
-        # Validaciones
         if password != password2:
             return JsonResponse({'success': False, 'message': 'Las contraseñas no coinciden.'})
 
@@ -83,7 +79,6 @@ def registroPage(request):
             return JsonResponse({'success': False, 'message': 'El RUT ya se encuentra registrado.'})
 
         try:
-            # Crear usuario y cliente
             user = User.objects.create_user(
                 username=username, 
                 email=email, 
@@ -98,7 +93,6 @@ def registroPage(request):
                 email=email
             )
 
-            # Iniciar sesión automáticamente
             user_auth = authenticate(request, username=username, password=password)
             if user_auth is not None:
                 login(request, user_auth)
@@ -121,30 +115,27 @@ def registroPage(request):
 
 def logoutUser(request):
     """Vista para cerrar sesión"""
-    next_url = request.GET.get('next', 'master')
+    next_url = request.GET.get('next')
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
-    return redirect(next_url)
-
-
-# ============= VISTAS DE PRODUCTOS CON FILTROS =============
+    if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
+        return redirect(next_url)
+    return redirect('master')
 
 def BicicletasListView(request):
     """Vista para listar bicicletas con filtros"""
     bicicletas = Bicicleta.objects.all()
     
-    # Aplicar filtros
     tipo_filtro = request.GET.get('tipo', '')
     if tipo_filtro:
-        bicicletas = bicicletas.filter(tipo_bicicleta=tipo_filtro)
+        bicicletas = bicicletas.filter(tipo=tipo_filtro)
     
-    # Aplicar ordenamiento
     ordenar = request.GET.get('ordenar', '')
     bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
     
     context = {
         'bicicletas': bicicletas,
-        'tipos_disponibles': Bicicleta.objects.values_list('tipo_bicicleta', flat=True).distinct(),
+        'tipos_disponibles': Bicicleta.objects.values_list('tipo', flat=True).distinct(),
     }
     return render(request, 'bicicletas.html', context)
 
@@ -153,7 +144,6 @@ def RepuestosListView(request):
     """Vista para listar repuestos con filtros"""
     repuestos = Repuesto.objects.all()
     
-    # Aplicar ordenamiento
     ordenar = request.GET.get('ordenar', '')
     repuestos = aplicar_ordenamiento(repuestos, ordenar)
     
@@ -164,7 +154,6 @@ def AccesoriosListView(request):
     """Vista para listar accesorios con filtros"""
     accesorios = Accesorio.objects.all()
     
-    # Aplicar ordenamiento
     ordenar = request.GET.get('ordenar', '')
     accesorios = aplicar_ordenamiento(accesorios, ordenar)
     
@@ -181,28 +170,24 @@ def Buscar(request):
     accesorios = []
     
     if query:
-        # Búsqueda en Bicicletas
         bicicletas = Bicicleta.objects.filter(
             Q(nombre__icontains=query) | 
             Q(modelo__icontains=query) |
             Q(descripcion__icontains=query) |
-            Q(tipo_bicicleta__icontains=query) |
-            Q(modelo_bicicleta__icontains=query)
+            Q(tipo__icontains=query) |
+            Q(modelo__icontains=query)
         )
-        
-        # Búsqueda en Repuestos
+
         repuestos = Repuesto.objects.filter(
             Q(nombre__icontains=query) | 
             Q(descripcion__icontains=query)
         )
-        
-        # Búsqueda en Accesorios
+
         accesorios = Accesorio.objects.filter(
             Q(nombre__icontains=query) | 
             Q(descripcion__icontains=query)
         )
-        
-        # Aplicar ordenamiento
+
         if ordenar:
             bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
             repuestos = aplicar_ordenamiento(repuestos, ordenar)
@@ -218,9 +203,6 @@ def Buscar(request):
     
     return render(request, 'buscar.html', context)
 
-
-# ============= VISTA MASTER =============
-
 class MasterListView(ListView):
     """Vista principal con productos destacados"""
     model = Bicicleta
@@ -234,45 +216,106 @@ class MasterListView(ListView):
         context['repuestos'] = Repuesto.objects.all()[:4]
         return context
 
-
-# ============= GESTIÓN DE BICICLETAS Y MANTENIMIENTO =============
-
 @login_required
 def agendar_cita(request):
     """Vista para registrar la bicicleta del cliente"""
     user = request.user
     
-    # Obtener o crear cliente
-    cliente_data, created = Cliente.objects.get_or_create(
-        email=user.email,
-        defaults={
-            'rut': '',
-            'nombre': user.first_name,
-            'apellido': user.last_name,
-        }
-    )
+    cliente_qs = Cliente.objects.filter(email=user.email)
+    cliente_data = cliente_qs.first()
+    created = False
+    if not cliente_data:
+        cliente_data = Cliente.objects.create(
+            email=user.email,
+            rut='',
+            nombre=user.first_name,
+            apellido=user.last_name,
+        )
+        created = True
 
     if request.method == 'POST':
-        try:
-            # Actualizar RUT si es necesario
-            rut_from_form = request.POST.get('rut')
-            if rut_from_form and not cliente_data.rut:
-                cliente_data.rut = rut_from_form
-                cliente_data.save()
+        nombre = request.POST.get('nombre', '').strip()
+        apellido = request.POST.get('apellido', '').strip()
+        email = request.POST.get('email', '').strip()
+        rut_from_form = request.POST.get('rut', '').strip()
+        bike_brand = request.POST.get('bike_brand', '').strip()
+        bike_color = request.POST.get('bike_color', '').strip()
+        bike_type = request.POST.get('bike_type', '').strip()
+        bike_year = request.POST.get('bike_year', '').strip()
+        additional_notes = request.POST.get('additional_notes', '').strip()
 
-            # Crear bicicleta
+        missing = []
+        if not bike_brand:
+            missing.append('Marca de la bicicleta')
+        if not bike_color:
+            missing.append('Color de la bicicleta')
+        if not bike_type:
+            missing.append('Tipo de bicicleta')
+
+        if missing:
+            messages.error(request, f'Debes completar: {", ".join(missing)}')
+            return redirect('registrobici')
+        
+        anio_val = None
+        if bike_year:
+            try:
+                anio_val = int(bike_year)
+                current_year = datetime.date.today().year
+                if anio_val < 1900 or anio_val > current_year:
+                    messages.error(request, 'Año de la bicicleta fuera de rango.')
+                    return redirect('registrobici')
+            except ValueError:
+                messages.error(request, 'Año de la bicicleta inválido.')
+                return redirect('registrobici')
+
+        if rut_from_form:
+            rut_clean = rut_from_form.replace('.', '').upper()
+            if not re.match(r'^\d{7,8}-[0-9K]$', rut_clean):
+                if re.match(r'^\d{7,8}$', rut_clean):
+                    rut_clean = rut_clean[:-1] + '-' + rut_clean[-1]
+                else:
+                    messages.error(request, 'Formato de RUT inválido. Use formato 12.345.678-9')
+                    return redirect('registrobici')
+        else:
+            rut_clean = ''
+
+        try:
+            if cliente_data:
+                updated = False
+                if nombre and cliente_data.nombre != nombre:
+                    cliente_data.nombre = nombre
+                    updated = True
+                if apellido and cliente_data.apellido != apellido:
+                    cliente_data.apellido = apellido
+                    updated = True
+                if email and cliente_data.email != email:
+                    cliente_data.email = email
+                    updated = True
+                if rut_clean and cliente_data.rut != rut_clean:
+                    cliente_data.rut = rut_clean
+                    updated = True
+                if updated:
+                    cliente_data.save()
+            else:
+                cliente_data = Cliente.objects.create(
+                    nombre=nombre or user.first_name,
+                    apellido=apellido or user.last_name,
+                    email=email or user.email or '',
+                    rut=rut_clean,
+                )
+
             BicicletaCliente.objects.create(
                 cliente=cliente_data,
-                marca=request.POST.get('bike_brand'),
-                color=request.POST.get('bike_color'),
-                tipo=request.POST.get('bike_type'),
-                año=int(request.POST.get('bike_year')) if request.POST.get('bike_year') else None,
-                notas_adicionales=request.POST.get('additional_notes', '')
+                marca=bike_brand,
+                color=bike_color,
+                tipo=bike_type,
+                anio=anio_val,
+                notas_adicionales=additional_notes
             )
-            
+
             messages.success(request, '¡Tu bicicleta ha sido registrada exitosamente!')
             return redirect('mantenimiento')
-            
+
         except Exception as e:
             messages.error(request, f'Ocurrió un error al registrar: {e}')
     
@@ -284,12 +327,13 @@ def mantemientoPage(request):
     """Vista para gestionar órdenes de mantenimiento"""
     user = request.user
     
-    try:
-        cliente_data = Cliente.objects.get(email=user.email)
-        bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
-    except Cliente.DoesNotExist:
+    cliente_qs = Cliente.objects.filter(email=user.email)
+    cliente_data = cliente_qs.first()
+    if not cliente_data:
         messages.error(request, 'Debes completar tu perfil primero.')
         return redirect('registrobici')
+
+    bicicleta_data = BicicletaCliente.objects.filter(cliente=cliente_data).last()
     
     if not bicicleta_data:
         messages.error(request, 'Debes registrar tu bicicleta primero.')
@@ -302,14 +346,11 @@ def mantemientoPage(request):
             messages.error(request, 'Debes seleccionar al menos un servicio.')
         else:
             try:
-                # Crear orden
                 orden = OrdenMantenimiento.objects.create(
                     cliente=cliente_data,
                     bicicleta=bicicleta_data,
                     estado='pendiente'
                 )
-
-                # Agregar servicios
                 for servicio_nombre in servicios_seleccionados:
                     try:
                         servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
@@ -342,10 +383,10 @@ def mantemientoPage(request):
 def historialMantenimientosPage(request):
     """Vista para mostrar el historial de mantenimientos"""
     user = request.user
-    try:
-        cliente = Cliente.objects.get(email=user.email)
+    cliente = Cliente.objects.filter(email=user.email).first()
+    if cliente:
         ordenes = OrdenMantenimiento.objects.filter(cliente=cliente).order_by('-fecha_creacion')
-    except Cliente.DoesNotExist:
+    else:
         ordenes = []
     
     return render(request, 'historial_mantenimientos.html', {'user': user, 'ordenes': ordenes})
@@ -358,16 +399,15 @@ def finalizar_orden(request):
         return JsonResponse({'success': False, 'error': 'Método no válido.'}, status=405)
     
     try:
-        cliente = Cliente.objects.get(email=request.user.email)
-        bicicleta = BicicletaCliente.objects.filter(cliente=cliente).first()
-        
+        cliente = Cliente.objects.filter(email=request.user.email).first()
+        bicicleta = BicicletaCliente.objects.filter(cliente=cliente).first() if cliente else None
+
         if not bicicleta:
             return JsonResponse({'success': False, 'error': 'No se encontró una bicicleta registrada.'})
 
         data = json.loads(request.body)
         servicios_nombres = data.get('servicios', [])
-        
-        # Crear orden
+
         orden = OrdenMantenimiento.objects.create(
             cliente=cliente,
             bicicleta=bicicleta,
@@ -375,7 +415,6 @@ def finalizar_orden(request):
             total=Decimal(str(data.get('total', 0)))
         )
 
-        # Agregar servicios
         for servicio_nombre in servicios_nombres:
             try:
                 servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
@@ -386,17 +425,15 @@ def finalizar_orden(request):
                 )
             except ServicioMantenimiento.DoesNotExist:
                 continue
-        
+
         orden.calcular_totales()
-        
+
         return JsonResponse({
             'success': True,
             'orden_id': orden.id,
             'total': float(orden.total)
         })
 
-    except Cliente.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'No se encontró el cliente.'})
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Formato JSON inválido.'})
     except Exception as e:

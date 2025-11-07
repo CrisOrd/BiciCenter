@@ -53,8 +53,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">RUT</label>
-                                <input type="text" class="form-control" name="rut" 
-                                       value="{{ cliente.rut }}" readonly>
+                    <input type="text" id="rut" class="form-control" name="rut" 
+                        value="{{ cliente.rut }}" readonly>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
@@ -72,7 +72,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Año</label>
                                     <input type="text" class="form-control" 
-                                           value="{% if bicicleta.año %}{{ bicicleta.año }}{% else %}No especificado{% endif %}" readonly>
+                                           value="{% if bicicleta.anio %}{{ bicicleta.anio }}{% else %}No especificado{% endif %}" readonly>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -174,7 +174,6 @@
             });
         });
 
-        // Validar formulario antes de enviar
         document.getElementById('mantenimientoForm').addEventListener('submit', function(e) {
             const selectedServices = document.querySelectorAll('input[name="servicios"]:checked');
             
@@ -184,7 +183,6 @@
                 return false;
             }
 
-            // Deshabilitar el botón para evitar envíos múltiples
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Procesando...';
@@ -192,9 +190,8 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Formatear RUT mientras se escribe (solo si no está readonly)
         const rutInput = document.getElementById('rut');
-        if (!rutInput.readOnly) {
+        if (rutInput && !rutInput.readOnly) {
             rutInput.addEventListener('input', function() {
                 let rut = this.value.replace(/[^0-9kK]/g, '');
                 if (rut.length > 1) {

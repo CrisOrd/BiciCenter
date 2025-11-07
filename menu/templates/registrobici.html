@@ -25,23 +25,23 @@
             {% endfor %}
         {% endif %}
         
-        <form method="POST">
+        <form method="POST" id="registroForm">
     {% csrf_token %}
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" name="nombre" placeholder="Nombre" required {% if user.is_authenticated %} value="{{ user.first_name }}" readonly {% endif %}>
+        <input type="text" name="nombre" placeholder="Nombre" value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}">
     </div>
     <div class="input-box">
         <i class="bi bi-person-fill"></i>
-        <input type="text" name="apellido" placeholder="Apellido" required {% if user.is_authenticated %} value="{{ user.last_name }}" readonly {% endif %}>
+        <input type="text" name="apellido" placeholder="Apellido" value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}">
     </div>
     <div class="input-box">
         <i class="bi bi-credit-card-2-front"></i>
-        <input type="text" name="rut" id="rut" placeholder="12.345.678-9" required {% if cliente %} value="{{ cliente.rut }}" readonly {% endif %}>
+        <input type="text" name="rut" id="rut" placeholder="12.345.678-9" {% if cliente and cliente.rut %} value="{{ cliente.rut }}" readonly {% endif %}>
     </div>
     <div class="input-box">
         <i class="bi bi-envelope-fill"></i>
-        <input type="email" name="email" placeholder="Correo electrónico" required {% if user.is_authenticated %} value="{{ cliente.email }}" readonly {% endif %}>
+        <input type="email" name="email" placeholder="Correo electrónico" {% if user.is_authenticated and user.email %} value="{{ user.email }}" readonly {% elif cliente and cliente.email %} value="{{ cliente.email }}" readonly {% endif %}>
     </div>
     <div class="input-box">
         <i class="bi bi-bicycle"></i>
@@ -102,56 +102,58 @@
     </div>
 
     <script>
-        // Formatear RUT mientras se escribe
-        document.getElementById('rut').addEventListener('input', function() {
+        const rutEl = document.getElementById('rut');
+        if (rutEl) {
+            rutEl.addEventListener('input', function() {
             let rut = this.value.replace(/[^0-9kK]/g, '');
             if (rut.length > 1) {
                 rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
             }
             this.value = rut.toUpperCase();
-        });
+            });
+        }
 
-        // Debug: Interceptar el submit del formulario
-        document.getElementById('registroForm').addEventListener('submit', function(e) {
-            console.log('=== FORMULARIO ENVIÁNDOSE ===');
-            
-            // Verificar que todos los campos obligatorios estén llenos
-            const requiredFields = [
-                'first_name', 'last_name', 'rut', 'email', 'phone', 
-                'bike_brand', 'bike_color', 'bike_type'
-            ];
-            
-            let allFieldsFilled = true;
-            const formData = new FormData(this);
-            
-            for (let field of requiredFields) {
-                const value = formData.get(field);
-                console.log(`${field}: "${value}"`);
-                if (!value || value.trim() === '') {
-                    allFieldsFilled = false;
-                    console.log(`⚠️  Campo vacío: ${field}`);
+        const registroForm = document.getElementById('registroForm');
+        if (registroForm) {
+            registroForm.addEventListener('submit', function(e) {
+                console.log('=== FORMULARIO ENVIÁNDOSE ===');
+
+                const requiredFields = [
+                    'bike_brand', 'bike_color', 'bike_type'
+                ];
+
+                let allFieldsFilled = true;
+                const formData = new FormData(this);
+
+                for (let field of requiredFields) {
+                    const value = formData.get(field);
+                    console.log(`${field}: "${value}"`);
+                    if (!value || value.trim() === '') {
+                        allFieldsFilled = false;
+                        console.log(`⚠️  Campo vacío: ${field}`);
+                    }
                 }
-            }
-            
-            // Mostrar todos los datos que se van a enviar
-            console.log('=== TODOS LOS DATOS DEL FORMULARIO ===');
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: "${value}"`);
-            }
-            
-            if (!allFieldsFilled) {
-                alert('Por favor, completa todos los campos obligatorios');
-                e.preventDefault();
-                return false;
-            }
-            
-            // Deshabilitar el botón para evitar envíos múltiples
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
-            
-            console.log('✅ Formulario válido, enviando...');
-        });
+
+                console.log('=== TODOS LOS DATOS DEL FORMULARIO ===');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: "${value}"`);
+                }
+
+                if (!allFieldsFilled) {
+                    alert('Por favor, completa todos los campos obligatorios');
+                    e.preventDefault();
+                    return false;
+                }
+
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+                }
+
+                console.log('✅ Formulario válido, enviando...');
+            });
+        }
     </script>
 </body>
 </html>

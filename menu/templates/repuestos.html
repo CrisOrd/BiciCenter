@@ -7,7 +7,6 @@
 <div class="container my-5">
     <h2 class="mb-4">Repuestos</h2>
     
-    <!-- Sección de Filtros -->
     <div class="filter-section">
         <h5>🔍 Filtrar y Ordenar</h5>
         <form method="GET" action="{% url 'repuestos' %}" class="filter-form">
@@ -35,7 +34,6 @@
         </div>
     {% endif %}
     
-    <!-- Lista de Productos -->
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
         {% for repuesto in repuestos %}
         <div class="col">

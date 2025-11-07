@@ -8,7 +8,6 @@
     {% if query %}
         <h2 class="mb-4">Resultados de búsqueda para: "{{ query }}"</h2>
         
-        <!-- Sección de Filtros -->
         <div class="filter-section">
             <h5>🔍 Ordenar Resultados</h5>
             <form method="GET" action="{% url 'buscar' %}" class="filter-form">
@@ -36,7 +35,6 @@
                 📊 Se encontraron <strong>{{ total_resultados }}</strong> resultado{{ total_resultados|pluralize }}
             </div>
             
-            <!-- Sección de Bicicletas -->
             {% if bicicletas %}
                 <h3 class="mt-5 mb-3">Bicicletas ({{ bicicletas|length }})</h3>
                 <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
@@ -59,7 +57,6 @@
                 </div>
             {% endif %}
 
-            <!-- Sección de Accesorios -->
             {% if accesorios %}
                 <h3 class="mt-5 mb-3">Accesorios ({{ accesorios|length }})</h3>
                 <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
@@ -82,7 +79,6 @@
                 </div>
             {% endif %}
 
-            <!-- Sección de Repuestos -->
             {% if repuestos %}
                 <h3 class="mt-5 mb-3">Repuestos ({{ repuestos|length }})</h3>
                 <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
@@ -105,7 +101,6 @@
                 </div>
             {% endif %}
         {% else %}
-            <!-- Mensaje cuando no hay resultados -->
             <div class="alert alert-info text-center my-5" role="alert">
                 <h4 class="alert-heading">¡No se encontraron resultados!</h4>
                 <p>No encontramos productos que coincidan con tu búsqueda "{{ query }}".</p>
@@ -119,7 +114,6 @@
             </div>
         {% endif %}
     {% else %}
-        <!-- Mensaje cuando no hay búsqueda -->
         <div class="alert alert-warning text-center my-5" role="alert">
             <h4 class="alert-heading">Búsqueda vacía</h4>
             <p>Por favor, ingresa un término de búsqueda para encontrar productos.</p>
