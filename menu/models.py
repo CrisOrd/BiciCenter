@@ -26,38 +26,13 @@ COLORES = [
 ]
 
 
-TIPOS_BICICLETA = [
-    ('mountain', 'Montaña'),
-    ('road', 'Ruta'),
-    ('hybrid', 'Híbrida'),
-    ('bmx', 'BMX'),
-    ('electric', 'Eléctrica'),
-    ('folding', 'Plegable'),
-    ('cruiser', 'Cruiser'),
-    ('city', 'Urbana'),
-]
-
-COLORES = [
-    ('negro', 'Negro'),
-    ('blanco', 'Blanco'),
-    ('rojo', 'Rojo'),
-    ('azul', 'Azul'),
-    ('verde', 'Verde'),
-    ('amarillo', 'Amarillo'),
-    ('naranja', 'Naranja'),
-    ('gris', 'Gris'),
-    ('multicolor', 'Multicolor'),
-]
-
-
 class Bicicleta(models.Model):
     nombre = models.CharField(max_length=255)
     marca = models.CharField(max_length=100, blank=True)
     modelo = models.CharField(max_length=255, blank=True)
     descripcion = models.TextField(blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-<<<<<<< HEAD
-=======
+    
     def precio_chileno(self):
         valor_int = int(self.precio)
         precio_formateado = f"{valor_int:,}".replace(',', '.')
@@ -66,7 +41,7 @@ class Bicicleta(models.Model):
     def precio_sin_simbolo(self):
         valor_int = int(self.precio)
         return f"{valor_int:,}".replace(',', '.')
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
+    
     imagen = models.ImageField(upload_to='bicicletas/', null=True, blank=True)
     tipo = models.CharField(max_length=50, choices=TIPOS_BICICLETA, default='city')
     color = models.CharField(max_length=20, blank=True)
@@ -85,8 +60,7 @@ class Repuesto(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-<<<<<<< HEAD
-=======
+    
     def precio_chileno(self):
         valor_int = int(self.precio)
         precio_formateado = f"{valor_int:,}".replace(',', '.')
@@ -95,7 +69,7 @@ class Repuesto(models.Model):
     def precio_sin_simbolo(self):
         valor_int = int(self.precio)
         return f"{valor_int:,}".replace(',', '.')
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
+    
     imagen = models.ImageField(upload_to='repuestos/', null=True, blank=True)
     categoria = models.CharField(max_length=100, blank=True)
     marca = models.CharField(max_length=100, blank=True)
@@ -111,8 +85,7 @@ class Accesorio(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-<<<<<<< HEAD
-=======
+    
     def precio_chileno(self):
         valor_int = int(self.precio)
         precio_formateado = f"{valor_int:,}".replace(',', '.')
@@ -121,7 +94,7 @@ class Accesorio(models.Model):
     def precio_sin_simbolo(self):
         valor_int = int(self.precio)
         return f"{valor_int:,}".replace(',', '.')
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
+    
     imagen = models.ImageField(upload_to='accesorios/', null=True, blank=True)
     categoria = models.CharField(max_length=100, blank=True)
     marca = models.CharField(max_length=100, blank=True)
@@ -130,10 +103,7 @@ class Accesorio(models.Model):
     def __str__(self):
         return self.nombre
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -157,10 +127,7 @@ class BicicletaCliente(models.Model):
         ('merida', 'Merida'),
         ('other', 'Otra'),
     ]
-<<<<<<< HEAD
-
-=======
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
+    
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     marca = models.CharField(max_length=50, choices=MARCAS)
     color = models.CharField(max_length=20, choices=COLORES)
@@ -192,8 +159,7 @@ class ServicioMantenimiento(models.Model):
 
     nombre = models.CharField(max_length=50, choices=SERVICIOS, unique=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-<<<<<<< HEAD
-=======
+    
     def precio_chileno(self):
         valor_int = int(self.precio)
         precio_formateado = f"{valor_int:,}".replace(',', '.')
@@ -202,7 +168,7 @@ class ServicioMantenimiento(models.Model):
     def precio_sin_simbolo(self):
         valor_int = int(self.precio)
         return f"{valor_int:,}".replace(',', '.')
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
+    
     descripcion = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
@@ -248,8 +214,7 @@ class ItemOrdenMantenimiento(models.Model):
     orden = models.ForeignKey(OrdenMantenimiento, on_delete=models.CASCADE)
     servicio = models.ForeignKey(ServicioMantenimiento, on_delete=models.CASCADE)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-<<<<<<< HEAD
-=======
+    
     def precio_chileno(self):
         valor_int = int(self.precio)
         precio_formateado = f"{valor_int:,}".replace(',', '.')
@@ -258,7 +223,6 @@ class ItemOrdenMantenimiento(models.Model):
     def precio_sin_simbolo(self):
         valor_int = int(self.precio)
         return f"{valor_int:,}".replace(',', '.')
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
 
     def save(self, *args, **kwargs):
         if not self.precio or self.precio == 0:
@@ -267,8 +231,6 @@ class ItemOrdenMantenimiento(models.Model):
 
     def __str__(self):
         return f"{self.servicio} - ${self.precio}"
-<<<<<<< HEAD
-=======
 
     
 class CarritoItem(models.Model):
@@ -304,4 +266,3 @@ class CarritoItem(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username} - {self.tipo_producto} #{self.producto_id}"
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091

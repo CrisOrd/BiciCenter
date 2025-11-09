@@ -51,26 +51,14 @@ WSGI_APPLICATION = 'bicicenter.wsgi.application'
 
 DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql').lower()
 
-if DB_ENGINE == 'mysql':
-    DATABASES = {
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('DB_NAME', 'bicicenter_db'),
-            'USER': os.environ.get('DB_USER', 'BiciCenter'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'Bici12345'),
-            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-            'PORT': os.environ.get('DB_PORT', '3306'),
-            'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-                'charset': 'utf8mb4',
-            },
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': 'bicicenter_db',
+            'USER': 'BiciCenter',
+            'PASSWORD': 'tori1234',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
         }
     }
 
@@ -143,3 +131,6 @@ if DEBUG:
         'http://127.0.0.1:8000',
         'http://localhost:8000',
     ]
+
+
+

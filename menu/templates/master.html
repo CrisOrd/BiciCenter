@@ -1,191 +1,185 @@
+<!DOCTYPE html>
 <html>
-    {% load static %}
-    <head>
-        <title>{% block title %}BiciCenter - Tu Centro de Bicicletas Favorito{% endblock %}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!DOCTYPE html>
-        <html>
-            {% load static %}
-            <head>
-                <title>{% block title %}BiciCenter - Tu Centro de Bicicletas Favorito{% endblock %}</title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-                <link rel="stylesheet" href="{% static 'css/master.css' %}">
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-                <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-            </head>
-            <body class="d-flex flex-column min-vh-100" data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+{% load static %}
+<head>
+    <title>{% block title %}BiciCenter - Tu Centro de Bicicletas Favorito{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/master.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<body class="d-flex flex-column min-vh-100" data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
 
-                <header>
-                    <div class="header-top">
-                        <div class="container">
-                            <div class="logo-container">
-                                <a class="navbar-brand" href="{% url 'master' %}">
-                                    <img src="{% static 'img/biciCenter.png' %}" alt="BiciCenter" class="logo-rectangular">
-                                </a>
-                            </div>
-                    
-                            <form class="search-bar" role="search" method="GET" action="{% url 'buscar' %}">
-                                <input class="form-control" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar" required>
-                                <button class="btn" type="submit">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <header>
+        <div class="header-top">
+            <div class="container">
+                <div class="logo-container">
+                    <a class="navbar-brand" href="{% url 'master' %}">
+                        <img src="{% static 'img/biciCenter.png' %}" alt="BiciCenter" class="logo-rectangular">
+                    </a>
+                </div>
+        
+                <form class="search-bar" role="search" method="GET" action="{% url 'buscar' %}">
+                    <input class="form-control" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar" required>
+                    <button class="btn" type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="header-bottom">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
             
-                    <div class="header-bottom">
-                        <nav class="navbar navbar-expand-lg">
-                            <div class="container">
-                                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                                    <span class="navbar-toggler-icon"></span>
-                                </button>
-                        
-                                <div class="collapse navbar-collapse" id="navbarNav">
-                                    <ul class="navbar-nav w-100">
-                                        {% if user.is_authenticated %}
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="{% url 'registrobici' %}">
-                                                    <i class="bi bi-calendar-check"></i> Agenda tu Cita
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="{% url 'bicicletas' %}">
-                                                <i class="bi bi-bicycle"></i> Bicicletas
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="{% url 'repuestos' %}">
-                                                <i class="bi bi-gear"></i> Repuestos
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="{% url 'accesorios' %}">
-                                                <i class="bi bi-bag"></i> Accesorios
-                                            </a>
-                                        </li>
-                                        <li class="nav-divider-mobile"></li>
-                                
-                                        <li class="nav-item ms-lg-auto">
-                                            <a class="nav-link" href="{% url 'carrito' %}">
-                                                <i class="bi bi-cart3"></i> Carrito
-                                                <span class="cart-badge-inline badge rounded-pill bg-danger" style="display: none;">0</span>
-                                            </a>
-                                        </li>
-                                
-                                        {% if user.is_authenticated %}
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">
-                                                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                                                </a>
-                                            </li>
-                                        {% else %}
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="{% url 'inicioSesion' %}">
-                                                    <i class="bi bi-person"></i> Iniciar Sesión
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="{% url 'registro' %}">
-                                                    <i class="bi bi-person-plus"></i> Registrarse
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </header>
-
-                <main class="flex-grow-1">
-                    {% block content %}
-                    <div class="container my-4">
-                        <a href="{% url 'bicicletas' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Bicicletas</a>
-                        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-                            {% for bici in bicicletas %}
-                            <div class="col">
-                                <div class="card h-100 product-card">
-                                    <a href="{% url 'producto_detalle' 'bicicleta' bici.id %}" class="text-decoration-none">
-                                        {% if bici.imagen %}
-                                            <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
-                                        {% else %}
-                                            <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                                        {% endif %}
-                                        <div class="card-body">
-                                            <h5 class="card-title text-dark">{{ bici.nombre }} - {{ bici.modelo }}</h5>
-                                            <p class="card-text text-success">${{ bici.precio }}</p>
-                                        </div>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav w-100">
+                            {% if user.is_authenticated %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'registrobici' %}">
+                                        <i class="bi bi-calendar-check"></i> Agenda tu Cita
                                     </a>
-                                </div>
-                            </div>
-                            {% empty %}
-                            <p>No hay bicicletas registradas.</p>
-                            {% endfor %}
-                        </div>
-
-                        <a href="{% url 'accesorios' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Accesorios</a>
-                        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-                            {% for accesorio in accesorios %}
-                            <div class="col">
-                                <div class="card h-100 product-card">
-                                    <a href="{% url 'producto_detalle' 'accesorio' accesorio.id %}" class="text-decoration-none">
-                                        {% if accesorio.imagen %}
-                                            <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
-                                        {% else %}
-                                            <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                                        {% endif %}
-                                        <div class="card-body">
-                                            <h5 class="card-title text-dark">{{ accesorio.nombre }}</h5>
-                                            <p class="card-text text-muted">{{ accesorio.descripcion|truncatewords:15 }}</p>
-                                            <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
-                                        </div>
-                                    </a>    
-                                </div>
-                            </div>
-                            {% empty %}
-                            <p>No hay accesorios registrados.</p>
-                            {% endfor %}
-                        </div>
-
-                        <a href="{% url 'repuestos' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Repuestos</a>
-                        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
-                            {% for repuesto in repuestos %}
-                            <div class="col">
-                                <div class="card h-100 product-card">
-                                    <a href="{% url 'producto_detalle' 'repuesto' repuesto.id %}" class="text-decoration-none">
-                                        {% if repuesto.imagen %}
-                                            <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
-                                        {% else %}
-                                            <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
-                                        {% endif %}
-                                        <div class="card-body">
-                                            <h5 class="card-title text-dark">{{ repuesto.nombre }}</h5>
-                                            <p class="card-text text-muted">{{ repuesto.descripcion|truncatewords:15 }}</p>
-                                            <p class="card-text text-success fw-bold">${{ repuesto.precio }}</p>
-                                        </div>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'bicicletas' %}">
+                                    <i class="bi bi-bicycle"></i> Bicicletas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'repuestos' %}">
+                                    <i class="bi bi-gear"></i> Repuestos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'accesorios' %}">
+                                    <i class="bi bi-bag"></i> Accesorios
+                                </a>
+                            </li>
+                            <li class="nav-divider-mobile"></li>
+                    
+                            <li class="nav-item ms-lg-auto">
+                                <a class="nav-link" href="{% url 'carrito' %}">
+                                    <i class="bi bi-cart3"></i> Carrito
+                                    <span class="cart-badge-inline badge rounded-pill bg-danger" style="display: none;">0</span>
+                                </a>
+                            </li>
+                    
+                            {% if user.is_authenticated %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">
+                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                                     </a>
-                                </div>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'inicioSesion' %}">
+                                        <i class="bi bi-person"></i> Iniciar Sesión
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'registro' %}">
+                                        <i class="bi bi-person-plus"></i> Registrarse
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow-1">
+        {% block content %}
+        <div class="container my-4">
+            <a href="{% url 'bicicletas' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Bicicletas</a>
+            <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                {% for bici in bicicletas %}
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'producto_detalle' 'bicicleta' bici.id %}" class="text-decoration-none">
+                            {% if bici.imagen %}
+                                <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ bici.nombre }} - {{ bici.modelo }}</h5>
+                                <p class="card-text text-success">${{ bici.precio }}</p>
                             </div>
-                            {% empty %}
-                            <p>No hay repuestos registrados.</p>
-                            {% endfor %}
-                        </div>
+                        </a>
                     </div>
-                    {% endblock %}
-                </main>
+                </div>
+                {% empty %}
+                <p>No hay bicicletas registradas.</p>
+                {% endfor %}
+            </div>
 
-                <footer>
-                    <div class="footer-content text-center py-3">
-                        <p class="mb-0">&copy; 2024 BiciCenter. Todos los derechos reservados.</p>
+            <a href="{% url 'accesorios' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Accesorios</a>
+            <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                {% for accesorio in accesorios %}
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'producto_detalle' 'accesorio' accesorio.id %}" class="text-decoration-none">
+                            {% if accesorio.imagen %}
+                                <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ accesorio.nombre }}</h5>
+                                <p class="card-text text-muted">{{ accesorio.descripcion|truncatewords:15 }}</p>
+                                <p class="card-text text-success fw-bold">${{ accesorio.precio }}</p>
+                            </div>
+                        </a>    
                     </div>
-                </footer>
+                </div>
+                {% empty %}
+                <p>No hay accesorios registrados.</p>
+                {% endfor %}
+            </div>
 
-                {% include 'modal.html' %}
-            </body>
-        </html>
+            <a href="{% url 'repuestos' %}" class="h2 text-decoration-none text-dark d-block mb-2 mt-4">Repuestos</a>
+            <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                {% for repuesto in repuestos %}
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'producto_detalle' 'repuesto' repuesto.id %}" class="text-decoration-none">
+                            {% if repuesto.imagen %}
+                                <img src="{{ repuesto.imagen.url }}" class="card-img-top" alt="{{ repuesto.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ repuesto.nombre }}</h5>
+                                <p class="card-text text-muted">{{ repuesto.descripcion|truncatewords:15 }}</p>
+                                <p class="card-text text-success fw-bold">${{ repuesto.precio }}</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No hay repuestos registrados.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content text-center py-3">
+            <p class="mb-0">&copy; 2024 BiciCenter. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    {% include 'modal.html' %}
+</body>
+</html>
