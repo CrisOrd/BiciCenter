@@ -53,10 +53,10 @@ DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql').lower()
 
 DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
             'NAME': 'bicicenter_db',
-            'USER': 'BiciCenter',
-            'PASSWORD': 'tori1234',
+            'ENGINE': 'django.db.backends.mysql',
+            'USER': 'root',
+            'PASSWORD': 'bici12345',
             'HOST': '127.0.0.1',
             'PORT': '3306',
         }
@@ -83,7 +83,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'es-es'
+LANGUAGE_CODE = 'es-cl'
 
 TIME_ZONE = 'America/Santiago'
 

@@ -6,10 +6,7 @@
 {% block content %}
 <div class="container my-5">
     <h2 class="mb-4">Accesorios</h2>
-<<<<<<< HEAD
     
-=======
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
     <div class="filter-section">
         <form method="GET" action="{% url 'accesorios' %}" class="filter-form">
             <div class="filter-group">
@@ -30,15 +27,12 @@
         </form>
     </div>
     
-<<<<<<< HEAD
     {% if accesorios %}
         <div class="results-info">
             📊 Mostrando <strong>{{ accesorios|length }}</strong> accesorio{{ accesorios|length|pluralize }}
         </div>
     {% endif %}
     
-=======
->>>>>>> 004a095238c4fb5e2bc0748e8471536451df7091
     <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
     {% for accesorio in accesorios %}
     <div class="col">

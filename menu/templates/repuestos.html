@@ -2,14 +2,11 @@
 {% load static %}
 
 {% block title %}Repuestos - BiciCenter{% endblock %}
-{% extends 'master.html' %}
-{% load static %}
-
-{% block title %}Repuestos - BiciCenter{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <h2 class="mb-4">Repuestos</h2>
+    
     <div class="filter-section">
         <form method="GET" action="{% url 'repuestos' %}" class="filter-form">
             <div class="filter-group">

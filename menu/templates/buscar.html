@@ -4,12 +4,6 @@
 {% block title %}Resultados de Búsqueda - BiciCenter{% endblock %}
 
 {% block content %}
-{% extends 'master.html' %}
-{% load static %}
-
-{% block title %}Resultados de Búsqueda - BiciCenter{% endblock %}
-
-{% block content %}
 <div class="container my-5">
     {% if query %}
         <h2 class="mb-4">Resultados de búsqueda para: "{{ query }}"</h2>
@@ -36,7 +30,7 @@
 
         {% if bicicletas or accesorios or repuestos %}
             <div class="results-info">
-                📊 Se encontraron <strong>{{ total_resultados }}</strong> resultado{{ total_resultados|pluralize }}
+                Se encontro <strong>{{ total_resultados }}</strong> resultado{{ total_resultados|pluralize }}
             </div>
             {% if bicicletas %}
                 <h3 class="mt-5 mb-3">Bicicletas</h3>

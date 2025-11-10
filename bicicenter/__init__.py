@@ -5,4 +5,3 @@ try:
 except Exception:
 	pass
 
-pymysql.install_as_MySQLdb()
