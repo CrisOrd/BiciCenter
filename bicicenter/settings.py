@@ -57,7 +57,7 @@ DATABASES = {
             'ENGINE': 'django.db.backends.mysql',
             'USER': 'root',
             'PASSWORD': 'bici12345',
-            'HOST': '127.0.0.1',
+            'HOST': '136.112.163.234',
             'PORT': '3306',
         }
     }
