@@ -1,18 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+# Eliminamos login_required porque valida contra la BD local, usaremos validación de sesión
 from django.views.generic import ListView
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.http import url_has_allowed_host_and_scheme
 from .api_client import APIClient, get_api_client, save_token_to_session, clear_token_from_session
 from decimal import Decimal
+import requests
 import json
-import json
-
 
 def inicioPage(request):
-    if request.user.is_authenticated:
+    # Validamos contra la sesión, no contra request.user (BD local)
+    if request.session.get('authenticated'):
         return redirect('master')
 
     if request.method == 'POST':
@@ -27,6 +27,7 @@ def inicioPage(request):
             token = response['data'].get('token')
             save_token_to_session(request, token)
             
+            # Guardamos el estado en la sesión
             request.session['authenticated'] = True
             request.session['username'] = username
             request.session['user_data'] = response['data'].get('user', {})
@@ -44,7 +45,8 @@ def inicioPage(request):
 
 
 def registroPage(request):
-    if request.user.is_authenticated:
+    # Validamos contra la sesión
+    if request.session.get('authenticated'):
         return redirect('master')
 
     if request.method == 'POST':
@@ -110,7 +112,11 @@ def registroPage(request):
 
 def logoutUser(request):
     api_client = get_api_client(request)
-    api_client.logout()
+    # Intentamos logout en API, pero limpiamos sesión local de todas formas
+    try:
+        api_client.logout()
+    except:
+        pass
     
     clear_token_from_session(request)
     if 'authenticated' in request.session:
@@ -120,6 +126,7 @@ def logoutUser(request):
     if 'user_data' in request.session:
         del request.session['user_data']
     
+    # Limpieza de sesión de Django por seguridad
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
     
@@ -169,7 +176,8 @@ def BicicletasListView(request):
         tipos_disponibles = sorted(tipos_set)
         marcas_disponibles = sorted(marcas_set)
     else:
-        messages.error(request, 'No se pudieron cargar las bicicletas.')
+        # Si falla, enviamos lista vacía para no romper la vista
+        pass 
     
     context = {
         'bicicletas': bicicletas,
@@ -197,8 +205,6 @@ def RepuestosListView(request):
             repuestos = data['results']
         else:
             repuestos = data
-    else:
-        messages.error(request, 'No se pudieron cargar los repuestos.')
     
     return render(request, 'repuestos.html', {'repuestos': repuestos})
 
@@ -220,8 +226,6 @@ def AccesoriosListView(request):
             accesorios = data['results']
         else:
             accesorios = data
-    else:
-        messages.error(request, 'No se pudieron cargar los accesorios.')
     
     return render(request, 'accesorios.html', {'accesorios': accesorios})
 
@@ -300,7 +304,7 @@ class MasterListView(ListView):
         return context
 
 
-@login_required
+# Eliminamos @login_required y usamos validación manual de sesión
 def carrito(request):
     if not request.session.get('authenticated'):
         messages.warning(request, 'Debes iniciar sesión para ver tu carrito.')
@@ -321,7 +325,8 @@ def carrito(request):
         total = data.get('total', 0)
         total_items = sum(item.get('cantidad', 0) for item in items)
     else:
-        messages.error(request, 'No se pudo cargar el carrito.')
+        # No mostrar error si el carrito está vacío o es nuevo
+        pass
     
     context = {
         'items': items,
@@ -359,7 +364,6 @@ def agregar_al_carrito(request, tipo, id):
     return redirect('producto_detalle', tipo=tipo, id=id)
 
 
-@login_required
 def eliminar_del_carrito(request, item_id):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -375,7 +379,6 @@ def eliminar_del_carrito(request, item_id):
     return redirect('carrito')
 
 
-@login_required
 def actualizar_cantidad_carrito(request, item_id):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -409,7 +412,6 @@ def comprar_ahora(request, tipo, id):
     return redirect('carrito')
 
 
-@login_required
 def vaciar_carrito(request):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -426,7 +428,6 @@ def vaciar_carrito(request):
     return redirect('carrito')
 
 
-@login_required
 def proceder_al_pago(request):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -447,7 +448,6 @@ def proceder_al_pago(request):
         return redirect('carrito')
 
 
-@login_required
 def agendar_cita(request):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -486,14 +486,14 @@ def agendar_cita(request):
                 messages.error(request, f'Error: {error_msg}')
     
     context = {
-        'user': request.user,
+        # Pasamos user_data como 'user' para que el template renderice los datos
+        'user': user_data,
         'cliente': user_data
     }
     
     return render(request, 'registrobici.html', context)
 
 
-@login_required
 def mantemientoPage(request):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -541,7 +541,7 @@ def mantemientoPage(request):
                 messages.error(request, f'Error: {error_msg}')
     
     context = {
-        'user': request.user,
+        'user': request.session.get('user_data', {}),
         'cliente': request.session.get('user_data', {}),
         'bicicleta': bicicleta,
         'servicios': servicios
@@ -550,7 +550,6 @@ def mantemientoPage(request):
     return render(request, 'mantenimiento.html', context)
 
 
-@login_required
 def historialMantenimientosPage(request):
     if not request.session.get('authenticated'):
         return redirect('inicioSesion')
@@ -565,12 +564,11 @@ def historialMantenimientosPage(request):
             ordenes = ordenes['results']
     
     return render(request, 'historial_mantenimientos.html', {
-        'user': request.user,
+        'user': request.session.get('user_data', {}),
         'ordenes': ordenes
     })
 
 
-@login_required
 def finalizar_orden(request):
     if not request.session.get('authenticated'):
         return JsonResponse({'success': False, 'error': 'No autenticado.'}, status=401)

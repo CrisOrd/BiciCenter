@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-k%^*5c0$cgbg180jjgagvrb@5gwylf0^ez%luhx2zb3y&%x$1j
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # Cambiar en producción
+ALLOWED_HOSTS = ['*']  
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,7 +27,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # CORS debe ir aquí
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -64,19 +64,7 @@ if DB_ENGINE == 'sqlite':
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-else:
-    DATABASES = {
-        'default': {
-            'NAME': 'bicicenter_db',
-            'ENGINE': 'django.db.backends.mysql',
-            'USER': 'root',
-            'PASSWORD': 'bici12345',
-            'HOST': '136.112.163.234',
-            'PORT': '3306',
-        }
-    }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -203,7 +191,7 @@ CORS_ALLOW_HEADERS = [
 # CONFIGURACIÓN API CLIENT
 # ============================================
 
-API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:8000/api/')
+API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:8001/api/')
 
 # ============================================
 # CONFIGURACIÓN SWAGGER/OPENAPI
