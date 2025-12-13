@@ -1,11 +1,38 @@
 from django.contrib import admin
-from django.urls import path, include   
+from django.urls import path, include
 from menu import views
+from menu.api_views import (
+    AuthViewSet, BicicletaViewSet, RepuestoViewSet, AccesorioViewSet,
+    ClienteViewSet, BicicletaClienteViewSet, ServicioMantenimientoViewSet,
+    OrdenMantenimientoViewSet, CarritoViewSet, BusquedaViewSet
+)
+from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
 
+# Router para API REST
+router = DefaultRouter()
+router.register(r'auth', AuthViewSet, basename='auth')
+router.register(r'bicicletas', BicicletaViewSet, basename='bicicleta')
+router.register(r'repuestos', RepuestoViewSet, basename='repuesto')
+router.register(r'accesorios', AccesorioViewSet, basename='accesorio')
+router.register(r'clientes', ClienteViewSet, basename='cliente')
+router.register(r'bicicletas-cliente', BicicletaClienteViewSet, basename='bicicleta-cliente')
+router.register(r'servicios-mantenimiento', ServicioMantenimientoViewSet, basename='servicio-mantenimiento')
+router.register(r'ordenes-mantenimiento', OrdenMantenimientoViewSet, basename='orden-mantenimiento')
+router.register(r'carrito', CarritoViewSet, basename='carrito')
+router.register(r'busqueda', BusquedaViewSet, basename='busqueda')
+
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
+    
+    # API REST
+    path('api/', include(router.urls)),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    
+    # Frontend views (vistas originales)
     path('inicioSesion/', views.inicioPage, name='inicioSesion'),
     path('registro/', views.registroPage, name='registro'),
     path('logout/', views.logoutUser, name='logout'),

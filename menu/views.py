@@ -1,38 +1,17 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
-from .models import (
-    Bicicleta, Repuesto, Accesorio, Cliente, BicicletaCliente,
-    ServicioMantenimiento, OrdenMantenimiento, ItemOrdenMantenimiento,
-    CarritoItem
-)
+from .api_client import APIClient, get_api_client, save_token_to_session, clear_token_from_session
 from decimal import Decimal
 import json
-import datetime
-import re
-
-
-def aplicar_ordenamiento(queryset, ordenar_por):
-    """Aplica ordenamiento a un queryset basado en el parámetro."""
-    orden_map = {
-        'nombre_asc': 'nombre',
-        'nombre_desc': '-nombre',
-        'precio_asc': 'precio',
-        'precio_desc': '-precio',
-        'modelo_asc': 'modelo',
-        'modelo_desc': '-modelo',
-    }
-    return queryset.order_by(orden_map.get(ordenar_por, 'id'))
+import json
 
 
 def inicioPage(request):
-    """Vista de inicio de sesión."""
     if request.user.is_authenticated:
         return redirect('master')
 
@@ -41,271 +20,340 @@ def inicioPage(request):
         password = request.POST.get('password', '')
         next_url = request.POST.get('next', 'master')
 
-        user = authenticate(request, username=username, password=password)
+        api_client = APIClient()
+        response = api_client.login(username, password)
 
-        if user is not None:
-            login(request, user)
-            nombre = user.first_name or user.username
+        if response['success']:
+            token = response['data'].get('token')
+            save_token_to_session(request, token)
+            
+            request.session['authenticated'] = True
+            request.session['username'] = username
+            request.session['user_data'] = response['data'].get('user', {})
+            
+            nombre = response['data'].get('user', {}).get('first_name') or username
             messages.success(request, f'¡Bienvenido de nuevo, {nombre}!')
             return redirect(next_url)
         else:
-            messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+            error_msg = response.get('error', {})
+            if isinstance(error_msg, dict):
+                error_msg = error_msg.get('detail', 'Credenciales incorrectas')
+            messages.error(request, f'Error: {error_msg}')
 
     return render(request, 'inicioSesion.html')
 
 
 def registroPage(request):
-    """Vista de registro de usuarios."""
     if request.user.is_authenticated:
         return redirect('master')
 
     if request.method == 'POST':
-        # Obtener y limpiar datos del formulario
-        nombre = request.POST.get('nombre', '').strip()
-        apellido = request.POST.get('apellido', '').strip()
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        rut = request.POST.get('rut', '').strip()
-        password = request.POST.get('password', '')
-        password2 = request.POST.get('password2', '')
+        user_data = {
+            'nombre': request.POST.get('nombre', '').strip(),
+            'apellido': request.POST.get('apellido', '').strip(),
+            'username': request.POST.get('username', '').strip(),
+            'email': request.POST.get('email', '').strip(),
+            'rut': request.POST.get('rut', '').strip(),
+            'password': request.POST.get('password', ''),
+            'password2': request.POST.get('password2', ''),
+        }
         next_url = request.POST.get('next', 'master')
 
-        # Validaciones básicas
-        if not all([nombre, apellido, username, email, rut, password, password2]):
+        if not all([user_data['nombre'], user_data['username'], user_data['email'], 
+                    user_data['rut'], user_data['password'], user_data['password2']]):
             messages.error(request, 'Todos los campos son obligatorios.')
             return render(request, 'registro.html')
 
-        if password != password2:
+        if user_data['password'] != user_data['password2']:
             messages.error(request, 'Las contraseñas no coinciden.')
             return render(request, 'registro.html')
 
-        if len(password) < 6:
-            messages.error(request, 'La contraseña debe tener al menos 6 caracteres.')
-            return render(request, 'registro.html')
+        api_data = {
+            'username': user_data['username'],
+            'email': user_data['email'],
+            'password': user_data['password'],
+            'password2': user_data['password2'],
+            'first_name': user_data['nombre'],
+            'last_name': user_data['apellido'],
+            'rut': user_data['rut']
+        }
 
-        # Validar duplicados
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'El nombre de usuario ya está en uso.')
-            return render(request, 'registro.html')
+        api_client = APIClient()
+        response = api_client.register(api_data)
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'El correo electrónico ya está registrado.')
-            return render(request, 'registro.html')
-
-        # Validar y limpiar RUT
-        rut_clean = rut.replace('.', '').replace('-', '').upper()
-        if len(rut_clean) < 8:
-            messages.error(request, 'RUT inválido.')
-            return render(request, 'registro.html')
-
-        rut_formatted = f"{rut_clean[:-1]}-{rut_clean[-1]}"
-
-        if Cliente.objects.filter(rut=rut_formatted).exists():
-            messages.error(request, 'El RUT ya se encuentra registrado.')
-            return render(request, 'registro.html')
-
-        try:
-            # Crear usuario
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                first_name=nombre,
-                last_name=apellido
-            )
-
-            # Crear cliente
-            Cliente.objects.create(
-                rut=rut_formatted,
-                nombre=nombre,
-                apellido=apellido,
-                email=email
-            )
-
-            # Autenticar e iniciar sesión automáticamente
-            user_auth = authenticate(request, username=username, password=password)
-            if user_auth:
-                login(request, user_auth)
-                messages.success(request, f'¡Bienvenido, {nombre}! Tu cuenta ha sido creada exitosamente.')
+        if response['success']:
+            login_response = api_client.login(user_data['username'], user_data['password'])
+            
+            if login_response['success']:
+                token = login_response['data'].get('token')
+                save_token_to_session(request, token)
+                request.session['authenticated'] = True
+                request.session['username'] = user_data['username']
+                request.session['user_data'] = login_response['data'].get('user', {})
+                
+                messages.success(request, f'¡Bienvenido, {user_data["nombre"]}! Tu cuenta ha sido creada exitosamente.')
                 return redirect(next_url)
-
-        except Exception as e:
-            messages.error(request, f'Ocurrió un error al registrar: {str(e)}')
+        else:
+            error_data = response.get('error', {})
+            if isinstance(error_data, dict):
+                for field, errors in error_data.items():
+                    if isinstance(errors, list):
+                        for error in errors:
+                            messages.error(request, f'{field}: {error}')
+                    else:
+                        messages.error(request, f'{field}: {errors}')
+            else:
+                messages.error(request, f'Error: {error_data}')
 
     return render(request, 'registro.html')
 
 
 def logoutUser(request):
-    """Cierra la sesión del usuario."""
-    next_url = request.GET.get('next')
+    api_client = get_api_client(request)
+    api_client.logout()
+    
+    clear_token_from_session(request)
+    if 'authenticated' in request.session:
+        del request.session['authenticated']
+    if 'username' in request.session:
+        del request.session['username']
+    if 'user_data' in request.session:
+        del request.session['user_data']
+    
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
     
+    next_url = request.GET.get('next')
     if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
         return redirect(next_url)
     return redirect('master')
 
 
 def BicicletasListView(request):
-    """Lista de bicicletas con filtros."""
-    bicicletas = Bicicleta.objects.all()
-
-    # Filtros
+    api_client = get_api_client(request)
+    
+    params = {}
     tipo_filtro = request.GET.get('tipo', '').strip()
     if tipo_filtro:
-        bicicletas = bicicletas.filter(tipo=tipo_filtro)
-
+        params['tipo'] = tipo_filtro
+    
     marca_filtro = request.GET.get('marca', '').strip()
     if marca_filtro:
-        bicicletas = bicicletas.filter(marca__iexact=marca_filtro)
-
-    # Ordenamiento
+        params['marca'] = marca_filtro
+    
     ordenar = request.GET.get('ordenar', '')
-    bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
-
+    if ordenar:
+        params['ordering'] = ordenar
+    
+    response = api_client.get_bicicletas(params=params)
+    
+    bicicletas = []
+    tipos_disponibles = []
+    marcas_disponibles = []
+    
+    if response['success']:
+        data = response['data']
+        if isinstance(data, dict) and 'results' in data:
+            bicicletas = data['results']
+        else:
+            bicicletas = data
+        
+        tipos_set = set()
+        marcas_set = set()
+        for bici in bicicletas:
+            if bici.get('tipo'):
+                tipos_set.add(bici['tipo'])
+            if bici.get('marca'):
+                marcas_set.add(bici['marca'])
+        
+        tipos_disponibles = sorted(tipos_set)
+        marcas_disponibles = sorted(marcas_set)
+    else:
+        messages.error(request, 'No se pudieron cargar las bicicletas.')
+    
     context = {
         'bicicletas': bicicletas,
-        'tipos_disponibles': Bicicleta.objects.values_list('tipo', flat=True).distinct(),
-        'marcas_disponibles': Bicicleta.objects.exclude(marca='').values_list('marca', flat=True).distinct().order_by('marca'),
+        'tipos_disponibles': tipos_disponibles,
+        'marcas_disponibles': marcas_disponibles,
     }
-
+    
     return render(request, 'bicicletas.html', context)
 
 
 def RepuestosListView(request):
-    """Lista de repuestos."""
-    repuestos = Repuesto.objects.all()
+    api_client = get_api_client(request)
+    
+    params = {}
     ordenar = request.GET.get('ordenar', '')
-    repuestos = aplicar_ordenamiento(repuestos, ordenar)
-
+    if ordenar:
+        params['ordering'] = ordenar
+    
+    response = api_client.get_repuestos(params=params)
+    
+    repuestos = []
+    if response['success']:
+        data = response['data']
+        if isinstance(data, dict) and 'results' in data:
+            repuestos = data['results']
+        else:
+            repuestos = data
+    else:
+        messages.error(request, 'No se pudieron cargar los repuestos.')
+    
     return render(request, 'repuestos.html', {'repuestos': repuestos})
 
 
 def AccesoriosListView(request):
-    """Lista de accesorios."""
-    accesorios = Accesorio.objects.all()
+    api_client = get_api_client(request)
+    
+    params = {}
     ordenar = request.GET.get('ordenar', '')
-    accesorios = aplicar_ordenamiento(accesorios, ordenar)
-
+    if ordenar:
+        params['ordering'] = ordenar
+    
+    response = api_client.get_accesorios(params=params)
+    
+    accesorios = []
+    if response['success']:
+        data = response['data']
+        if isinstance(data, dict) and 'results' in data:
+            accesorios = data['results']
+        else:
+            accesorios = data
+    else:
+        messages.error(request, 'No se pudieron cargar los accesorios.')
+    
     return render(request, 'accesorios.html', {'accesorios': accesorios})
 
 
 def Buscar(request):
-    """Búsqueda global de productos."""
     query = request.GET.get('q', '').strip()
     ordenar = request.GET.get('ordenar', '')
-
-    bicicletas = repuestos = accesorios = []
-
+    
+    bicicletas = []
+    repuestos = []
+    accesorios = []
+    total_resultados = 0
+    
     if query:
-        # Búsqueda en bicicletas
-        bicicletas = Bicicleta.objects.filter(
-            Q(nombre__icontains=query) |
-            Q(modelo__icontains=query) |
-            Q(descripcion__icontains=query) |
-            Q(tipo__icontains=query) |
-            Q(marca__icontains=query)
-        )
-
-        # Búsqueda en repuestos
-        repuestos = Repuesto.objects.filter(
-            Q(nombre__icontains=query) |
-            Q(descripcion__icontains=query)
-        )
-
-        # Búsqueda en accesorios
-        accesorios = Accesorio.objects.filter(
-            Q(nombre__icontains=query) |
-            Q(descripcion__icontains=query)
-        )
-
-        # Aplicar ordenamiento
+        api_client = get_api_client(request)
+        params = {'q': query}
         if ordenar:
-            bicicletas = aplicar_ordenamiento(bicicletas, ordenar)
-            repuestos = aplicar_ordenamiento(repuestos, ordenar)
-            accesorios = aplicar_ordenamiento(accesorios, ordenar)
-
+            params['ordering'] = ordenar
+        
+        response = api_client.buscar_productos(query, params=params)
+        
+        if response['success']:
+            data = response['data']
+            bicicletas = data.get('bicicletas', [])
+            repuestos = data.get('repuestos', [])
+            accesorios = data.get('accesorios', [])
+            total_resultados = len(bicicletas) + len(repuestos) + len(accesorios)
+        else:
+            messages.error(request, 'Error al realizar la búsqueda.')
+    
     context = {
         'query': query,
         'bicicletas': bicicletas,
         'repuestos': repuestos,
         'accesorios': accesorios,
-        'total_resultados': len(bicicletas) + len(repuestos) + len(accesorios)
+        'total_resultados': total_resultados
     }
-
+    
     return render(request, 'buscar.html', context)
 
 
 class MasterListView(ListView):
-    """Página principal con productos destacados."""
-    model = Bicicleta
     template_name = 'master.html'
     context_object_name = 'productos'
-
+    
+    def get_queryset(self):
+        return []
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['bicicletas'] = Bicicleta.objects.all()[:4]
-        context['accesorios'] = Accesorio.objects.all()[:4]
-        context['repuestos'] = Repuesto.objects.all()[:4]
+        api_client = get_api_client(self.request)
+        
+        bicicletas_response = api_client.get_bicicletas()
+        accesorios_response = api_client.get_accesorios()
+        repuestos_response = api_client.get_repuestos()
+        
+        context['bicicletas'] = []
+        context['accesorios'] = []
+        context['repuestos'] = []
+        
+        if bicicletas_response['success']:
+            data = bicicletas_response['data']
+            bicicletas = data['results'] if isinstance(data, dict) and 'results' in data else data
+            context['bicicletas'] = bicicletas[:4]
+        
+        if accesorios_response['success']:
+            data = accesorios_response['data']
+            accesorios = data['results'] if isinstance(data, dict) and 'results' in data else data
+            context['accesorios'] = accesorios[:4]
+        
+        if repuestos_response['success']:
+            data = repuestos_response['data']
+            repuestos = data['results'] if isinstance(data, dict) and 'results' in data else data
+            context['repuestos'] = repuestos[:4]
+        
         return context
 
 
 @login_required
 def carrito(request):
-    """Vista del carrito de compras."""
-    items = CarritoItem.objects.filter(usuario=request.user)
-    subtotal = sum(item.get_subtotal() for item in items)
-    total = subtotal
-
+    if not request.session.get('authenticated'):
+        messages.warning(request, 'Debes iniciar sesión para ver tu carrito.')
+        return redirect('inicioSesion')
+    
+    api_client = get_api_client(request)
+    response = api_client.get_carrito()
+    
+    items = []
+    subtotal = 0
+    total = 0
+    total_items = 0
+    
+    if response['success']:
+        data = response['data']
+        items = data.get('items', [])
+        subtotal = data.get('subtotal', 0)
+        total = data.get('total', 0)
+        total_items = sum(item.get('cantidad', 0) for item in items)
+    else:
+        messages.error(request, 'No se pudo cargar el carrito.')
+    
     context = {
         'items': items,
         'subtotal': subtotal,
         'total': total,
-        'total_items': sum(item.cantidad for item in items)
+        'total_items': total_items
     }
-
+    
     return render(request, 'carrito.html', context)
 
 
 def agregar_al_carrito(request, tipo, id):
-    """Agregar producto al carrito."""
-    if not request.user.is_authenticated:
+    if not request.session.get('authenticated'):
         messages.warning(request, 'Debes iniciar sesión para agregar productos al carrito.')
         return redirect(f'/inicioSesion/?next=/producto/{tipo}/{id}/')
-
-    # Validar tipo de producto
-    modelos = {
-        'bicicleta': Bicicleta,
-        'accesorio': Accesorio,
-        'repuesto': Repuesto
-    }
-
-    if tipo not in modelos:
+    
+    tipos_validos = ['bicicleta', 'repuesto', 'accesorio']
+    if tipo not in tipos_validos:
         messages.error(request, 'Tipo de producto no válido.')
         return redirect('master')
-
-    try:
-        producto = modelos[tipo].objects.get(id=id)
-    except modelos[tipo].DoesNotExist:
-        messages.error(request, 'Producto no encontrado.')
-        return redirect('master')
-
-    # Agregar o actualizar item en carrito
-    item, created = CarritoItem.objects.get_or_create(
-        usuario=request.user,
-        tipo_producto=tipo,
-        producto_id=id,
-        defaults={'cantidad': 1}
-    )
-
-    if not created:
-        item.cantidad += 1
-        item.save()
-        messages.success(request, f'Se agregó otra unidad de "{producto.nombre}" al carrito.')
+    
+    api_client = get_api_client(request)
+    response = api_client.agregar_al_carrito(tipo, id)
+    
+    if response['success']:
+        messages.success(request, 'Producto agregado al carrito exitosamente.')
     else:
-        messages.success(request, f'"{producto.nombre}" fue agregado al carrito.')
-
-    # Redireccionar
+        error_msg = response.get('error', 'No se pudo agregar el producto.')
+        if isinstance(error_msg, dict):
+            error_msg = error_msg.get('detail', 'Error al agregar al carrito')
+        messages.error(request, f'Error: {error_msg}')
+    
     if request.GET.get('redirect') == 'carrito':
         return redirect('carrito')
     return redirect('producto_detalle', tipo=tipo, id=id)
@@ -313,47 +361,47 @@ def agregar_al_carrito(request, tipo, id):
 
 @login_required
 def eliminar_del_carrito(request, item_id):
-    """Eliminar item del carrito."""
-    try:
-        item = CarritoItem.objects.get(id=item_id, usuario=request.user)
-        producto = item.get_producto()
-        item.delete()
-        if producto:
-            messages.success(request, f'"{producto.nombre}" fue eliminado del carrito.')
-        else:
-            messages.success(request, 'Producto eliminado del carrito.')
-    except CarritoItem.DoesNotExist:
-        messages.error(request, 'Item no encontrado.')
-
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
+    api_client = get_api_client(request)
+    response = api_client.eliminar_del_carrito(item_id)
+    
+    if response['success']:
+        messages.success(request, 'Producto eliminado del carrito.')
+    else:
+        messages.error(request, 'No se pudo eliminar el producto.')
+    
     return redirect('carrito')
 
 
 @login_required
 def actualizar_cantidad_carrito(request, item_id):
-    """Actualizar cantidad de un item en el carrito."""
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
     if request.method == 'POST':
         try:
-            item = CarritoItem.objects.get(id=item_id, usuario=request.user)
             nueva_cantidad = int(request.POST.get('cantidad', 1))
-
+            
             if nueva_cantidad > 0:
-                item.cantidad = nueva_cantidad
-                item.save()
-                messages.success(request, 'Cantidad actualizada.')
+                api_client = get_api_client(request)
+                response = api_client.actualizar_cantidad_carrito(item_id, nueva_cantidad)
+                
+                if response['success']:
+                    messages.success(request, 'Cantidad actualizada.')
+                else:
+                    messages.error(request, 'No se pudo actualizar la cantidad.')
             else:
-                item.delete()
-                messages.success(request, 'Producto eliminado del carrito.')
-        except CarritoItem.DoesNotExist:
-            messages.error(request, 'Item no encontrado.')
+                return eliminar_del_carrito(request, item_id)
         except ValueError:
             messages.error(request, 'Cantidad no válida.')
-
+    
     return redirect('carrito')
 
 
 def comprar_ahora(request, tipo, id):
-    """Comprar producto directamente."""
-    if not request.user.is_authenticated:
+    if not request.session.get('authenticated'):
         messages.warning(request, 'Debes iniciar sesión para realizar una compra.')
         return redirect(f'/inicioSesion/?next=/producto/{tipo}/{id}/')
     
@@ -363,180 +411,158 @@ def comprar_ahora(request, tipo, id):
 
 @login_required
 def vaciar_carrito(request):
-    """Vaciar todo el carrito."""
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
     if request.method == 'POST':
-        CarritoItem.objects.filter(usuario=request.user).delete()
-        messages.success(request, 'El carrito ha sido vaciado.')
-
+        api_client = get_api_client(request)
+        response = api_client.vaciar_carrito()
+        
+        if response['success']:
+            messages.success(request, 'El carrito ha sido vaciado.')
+        else:
+            messages.error(request, 'No se pudo vaciar el carrito.')
+    
     return redirect('carrito')
 
 
 @login_required
 def proceder_al_pago(request):
-    """Procesar pago y finalizar compra."""
-    items = CarritoItem.objects.filter(usuario=request.user)
-
-    if not items.exists():
-        messages.warning(request, 'Tu carrito está vacío.')
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
+    api_client = get_api_client(request)
+    response = api_client.proceder_al_pago()
+    
+    if response['success']:
+        data = response['data']
+        total = data.get('total', 0)
+        messages.success(request, f'¡Compra realizada exitosamente! Total: ${int(total):,}'.replace(',', '.'))
+        return redirect('master')
+    else:
+        error_msg = response.get('error', 'Error al procesar el pago')
+        if isinstance(error_msg, dict):
+            error_msg = error_msg.get('detail', 'Error al procesar el pago')
+        messages.error(request, f'Error: {error_msg}')
         return redirect('carrito')
-
-    subtotal = sum(item.get_subtotal() for item in items)
-    messages.success(request, f'¡Compra realizada exitosamente! Total: ${int(subtotal):,}'.replace(',', '.'))
-
-    items.delete()
-    return redirect('master')
 
 
 @login_required
 def agendar_cita(request):
-    """Registrar bicicleta del cliente."""
-    user = request.user
-
-    # Obtener o crear cliente
-    cliente, created = Cliente.objects.get_or_create(
-        email=user.email,
-        defaults={
-            'rut': '',
-            'nombre': user.first_name or '',
-            'apellido': user.last_name or '',
-        }
-    )
-
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
+    user_data = request.session.get('user_data', {})
+    
     if request.method == 'POST':
-        # Obtener datos del formulario
-        nombre = request.POST.get('nombre', '').strip()
-        apellido = request.POST.get('apellido', '').strip()
-        rut_from_form = request.POST.get('rut', '').strip()
-        bike_brand = request.POST.get('bike_brand', '').strip()
-        bike_color = request.POST.get('bike_color', '').strip()
-        bike_type = request.POST.get('bike_type', '').strip()
-        bike_year = request.POST.get('bike_year', '').strip()
-        additional_notes = request.POST.get('additional_notes', '').strip()
-
-        # Validar campos obligatorios
-        if not all([bike_brand, bike_color, bike_type]):
+        bici_data = {
+            'marca': request.POST.get('bike_brand', '').strip(),
+            'color': request.POST.get('bike_color', '').strip(),
+            'tipo': request.POST.get('bike_type', '').strip(),
+            'anio': request.POST.get('bike_year', '').strip() or None,
+            'notas_adicionales': request.POST.get('additional_notes', '').strip()
+        }
+        
+        if not all([bici_data['marca'], bici_data['color'], bici_data['tipo']]):
             messages.error(request, 'Debes completar marca, color y tipo de bicicleta.')
             return redirect('registrobici')
-
-        # Validar año
-        anio_val = None
-        if bike_year:
-            try:
-                anio_val = int(bike_year)
-                current_year = datetime.date.today().year
-                if not (1900 <= anio_val <= current_year):
-                    messages.error(request, 'Año de la bicicleta fuera de rango.')
-                    return redirect('registrobici')
-            except ValueError:
-                messages.error(request, 'Año de la bicicleta inválido.')
-                return redirect('registrobici')
-
-        # Limpiar y validar RUT
-        rut_clean = ''
-        if rut_from_form:
-            rut_clean = rut_from_form.replace('.', '').replace('-', '').upper()
-            if len(rut_clean) >= 8:
-                rut_clean = f"{rut_clean[:-1]}-{rut_clean[-1]}"
-            else:
-                messages.error(request, 'Formato de RUT inválido.')
-                return redirect('registrobici')
-
-        try:
-            # Actualizar datos del cliente si es necesario
-            if nombre:
-                cliente.nombre = nombre
-            if apellido:
-                cliente.apellido = apellido
-            if rut_clean:
-                cliente.rut = rut_clean
-            cliente.save()
-
-            # Crear registro de bicicleta
-            BicicletaCliente.objects.create(
-                cliente=cliente,
-                marca=bike_brand,
-                color=bike_color,
-                tipo=bike_type,
-                anio=anio_val,
-                notas_adicionales=additional_notes
-            )
-
+        
+        api_client = get_api_client(request)
+        response = api_client.registrar_bicicleta_cliente(bici_data)
+        
+        if response['success']:
             messages.success(request, '¡Tu bicicleta ha sido registrada exitosamente!')
             return redirect('mantenimiento')
-
-        except Exception as e:
-            messages.error(request, f'Ocurrió un error al registrar: {str(e)}')
-
-    return render(request, 'registrobici.html', {'user': user, 'cliente': cliente})
+        else:
+            error_msg = response.get('error', 'Error al registrar')
+            if isinstance(error_msg, dict):
+                for field, errors in error_msg.items():
+                    if isinstance(errors, list):
+                        for error in errors:
+                            messages.error(request, f'{field}: {error}')
+                    else:
+                        messages.error(request, f'{field}: {errors}')
+            else:
+                messages.error(request, f'Error: {error_msg}')
+    
+    context = {
+        'user': request.user,
+        'cliente': user_data
+    }
+    
+    return render(request, 'registrobici.html', context)
 
 
 @login_required
 def mantemientoPage(request):
-    """Crear orden de mantenimiento."""
-    user = request.user
-
-    # Verificar que exista cliente
-    try:
-        cliente = Cliente.objects.get(email=user.email)
-    except Cliente.DoesNotExist:
-        messages.error(request, 'Debes completar tu perfil primero.')
-        return redirect('registrobici')
-
-    # Verificar que exista bicicleta registrada
-    bicicleta = BicicletaCliente.objects.filter(cliente=cliente).last()
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
+    api_client = get_api_client(request)
+    
+    servicios_response = api_client.get_servicios_mantenimiento()
+    servicios = []
+    if servicios_response['success']:
+        servicios = servicios_response['data']
+    
+    bicicletas_response = api_client.get_bicicletas_cliente()
+    bicicleta = None
+    if bicicletas_response['success']:
+        bicicletas = bicicletas_response['data']
+        if isinstance(bicicletas, list) and len(bicicletas) > 0:
+            bicicleta = bicicletas[-1]
+    
     if not bicicleta:
         messages.error(request, 'Debes registrar tu bicicleta primero.')
         return redirect('registrobici')
-
+    
     if request.method == 'POST':
-        servicios_seleccionados = request.POST.getlist('servicios')
-
-        if not servicios_seleccionados:
+        servicios_ids = request.POST.getlist('servicios')
+        
+        if not servicios_ids:
             messages.error(request, 'Debes seleccionar al menos un servicio.')
         else:
-            try:
-                # Crear orden de mantenimiento
-                orden = OrdenMantenimiento.objects.create(
-                    cliente=cliente,
-                    bicicleta=bicicleta,
-                    estado='pendiente'
-                )
-
-                # Agregar servicios a la orden
-                for servicio_nombre in servicios_seleccionados:
-                    try:
-                        servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
-                        ItemOrdenMantenimiento.objects.create(
-                            orden=orden,
-                            servicio=servicio,
-                            precio=servicio.precio
-                        )
-                    except ServicioMantenimiento.DoesNotExist:
-                        continue
-
-                orden.calcular_totales()
-                total_formateado = f"${int(orden.total):,}".replace(',', '.')
-                messages.success(request, f'¡Orden #{orden.id} creada exitosamente! Total: {total_formateado}')
+            orden_data = {
+                'bicicleta': bicicleta['id'],
+                'servicios_ids': [int(sid) for sid in servicios_ids],
+                'estado': 'pendiente'
+            }
+            
+            response = api_client.crear_orden_mantenimiento(orden_data)
+            
+            if response['success']:
+                orden = response['data']
+                total = orden.get('total', 0)
+                total_formateado = f"${int(total):,}".replace(',', '.')
+                messages.success(request, f'¡Orden #{orden["id"]} creada exitosamente! Total: {total_formateado}')
                 return redirect('master')
-
-            except Exception as e:
-                messages.error(request, f'Error al crear la orden: {str(e)}')
-
+            else:
+                error_msg = response.get('error', 'Error al crear la orden')
+                messages.error(request, f'Error: {error_msg}')
+    
     context = {
-        'user': user,
-        'cliente': cliente,
+        'user': request.user,
+        'cliente': request.session.get('user_data', {}),
         'bicicleta': bicicleta,
-        'servicios': ServicioMantenimiento.objects.all()
+        'servicios': servicios
     }
-
+    
     return render(request, 'mantenimiento.html', context)
 
 
 @login_required
 def historialMantenimientosPage(request):
-    """Historial de órdenes de mantenimiento."""
-    cliente = Cliente.objects.filter(email=request.user.email).first()
-    ordenes = OrdenMantenimiento.objects.filter(cliente=cliente).order_by('-fecha_creacion') if cliente else []
+    if not request.session.get('authenticated'):
+        return redirect('inicioSesion')
+    
+    api_client = get_api_client(request)
+    response = api_client.get_ordenes_mantenimiento()
+    
+    ordenes = []
+    if response['success']:
+        ordenes = response['data']
+        if isinstance(ordenes, dict) and 'results' in ordenes:
+            ordenes = ordenes['results']
     
     return render(request, 'historial_mantenimientos.html', {
         'user': request.user,
@@ -546,49 +572,49 @@ def historialMantenimientosPage(request):
 
 @login_required
 def finalizar_orden(request):
-    """API para finalizar orden de mantenimiento (JSON)."""
+    if not request.session.get('authenticated'):
+        return JsonResponse({'success': False, 'error': 'No autenticado.'}, status=401)
+    
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no válido.'}, status=405)
-
+    
     try:
-        cliente = Cliente.objects.filter(email=request.user.email).first()
-        if not cliente:
-            return JsonResponse({'success': False, 'error': 'Cliente no encontrado.'})
-
-        bicicleta = BicicletaCliente.objects.filter(cliente=cliente).first()
-        if not bicicleta:
-            return JsonResponse({'success': False, 'error': 'No se encontró una bicicleta registrada.'})
-
         data = json.loads(request.body)
-        servicios_nombres = data.get('servicios', [])
-
-        # Crear orden
-        orden = OrdenMantenimiento.objects.create(
-            cliente=cliente,
-            bicicleta=bicicleta,
-            estado='pendiente'
-        )
-
-        # Agregar servicios
-        for servicio_nombre in servicios_nombres:
-            try:
-                servicio = ServicioMantenimiento.objects.get(nombre=servicio_nombre)
-                ItemOrdenMantenimiento.objects.create(
-                    orden=orden,
-                    servicio=servicio,
-                    precio=servicio.precio
-                )
-            except ServicioMantenimiento.DoesNotExist:
-                continue
-
-        orden.calcular_totales()
-
-        return JsonResponse({
-            'success': True,
-            'orden_id': orden.id,
-            'total': float(orden.total)
-        })
-
+        servicios_ids = data.get('servicios', [])
+        
+        if not servicios_ids:
+            return JsonResponse({'success': False, 'error': 'Debes seleccionar servicios.'})
+        
+        api_client = get_api_client(request)
+        bicicletas_response = api_client.get_bicicletas_cliente()
+        
+        if not bicicletas_response['success']:
+            return JsonResponse({'success': False, 'error': 'No se encontró bicicleta registrada.'})
+        
+        bicicletas = bicicletas_response['data']
+        if not bicicletas:
+            return JsonResponse({'success': False, 'error': 'No tienes bicicletas registradas.'})
+        
+        bicicleta_id = bicicletas[-1]['id']
+        
+        orden_data = {
+            'bicicleta': bicicleta_id,
+            'servicios_ids': servicios_ids,
+            'estado': 'pendiente'
+        }
+        
+        response = api_client.crear_orden_mantenimiento(orden_data)
+        
+        if response['success']:
+            orden = response['data']
+            return JsonResponse({
+                'success': True,
+                'orden_id': orden['id'],
+                'total': orden['total']
+            })
+        else:
+            return JsonResponse({'success': False, 'error': response.get('error', 'Error al crear orden')})
+    
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Formato JSON inválido.'})
     except Exception as e:
@@ -596,26 +622,51 @@ def finalizar_orden(request):
 
 
 def producto_detalle(request, tipo, id):
-    """Detalle de un producto."""
-    modelos = {
-        'bicicleta': (Bicicleta, 'Bicicleta', 'bicicletas'),
-        'accesorio': (Accesorio, 'Accesorio', 'accesorios'),
-        'repuesto': (Repuesto, 'Repuesto', 'repuestos')
+    tipos_validos = {
+        'bicicleta': ('Bicicleta', 'bicicletas'),
+        'accesorio': ('Accesorio', 'accesorios'),
+        'repuesto': ('Repuesto', 'repuestos')
     }
-
-    if tipo not in modelos:
+    
+    if tipo not in tipos_validos:
         messages.error(request, 'Tipo de producto no válido.')
         return redirect('master')
-
-    modelo, tipo_producto, tipo_url = modelos[tipo]
-    producto = get_object_or_404(modelo, id=id)
-    productos_relacionados = modelo.objects.exclude(id=id).order_by('?')[:4]
-
+    
+    tipo_producto, tipo_url = tipos_validos[tipo]
+    
+    api_client = get_api_client(request)
+    
+    if tipo == 'bicicleta':
+        response = api_client.get_bicicleta(id)
+    elif tipo == 'repuesto':
+        response = api_client.get_repuesto(id)
+    else:
+        response = api_client.get_accesorio(id)
+    
+    if not response['success']:
+        messages.error(request, 'Producto no encontrado.')
+        return redirect('master')
+    
+    producto = response['data']
+    
+    if tipo == 'bicicleta':
+        relacionados_response = api_client.get_bicicletas()
+    elif tipo == 'repuesto':
+        relacionados_response = api_client.get_repuestos()
+    else:
+        relacionados_response = api_client.get_accesorios()
+    
+    productos_relacionados = []
+    if relacionados_response['success']:
+        data = relacionados_response['data']
+        todos = data['results'] if isinstance(data, dict) and 'results' in data else data
+        productos_relacionados = [p for p in todos if p['id'] != id][:4]
+    
     context = {
         'producto': producto,
         'tipo_producto': tipo_producto,
         'tipo_url': tipo_url,
         'productos_relacionados': productos_relacionados,
     }
-
+    
     return render(request, 'vistaProducto.html', context)
