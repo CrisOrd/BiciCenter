@@ -716,7 +716,7 @@ def mantemientoPage(request):
             orden_data = {
                 'cliente': user_data.get('id'),
                 'bicicleta': bicicleta['id'],
-                'servicios_ids': ids_servicios,
+                'servicios': ids_servicios,
                 'estado': 'pendiente'
             }
             

@@ -14,7 +14,13 @@ class APIClient:
     def login(self, username, password):
         url = f'{self.base_url}auth/login/'
         try:
-            response = requests.post(url, json={'username': username, 'password': password}, headers=self.headers)
+        # Quitamos headers=self.headers para que vaya "limpio"
+            response = requests.post(url, json={'username': username, 'password': password})
+        
+        # Opcional: Imprimir error si falla para depurar
+            if response.status_code != 200:
+                print("ERROR LOGIN API:", response.text)
+            
             return response.json()
         except Exception as e:
             return {'success': False, 'error': str(e)}
@@ -121,10 +127,28 @@ class APIClient:
         url = f'{self.base_url}ordenes-mantenimiento/'
         try:
             response = requests.post(url, json=data, headers=self.headers)
+            
+            # 1. Intentamos decodificar JSON
+            try:
+                response_data = response.json()
+            except ValueError:
+                # Si falla, guardamos el texto plano (HTML de error) para verlo
+                response_data = response.text
+
+            # 2. DEBUG: Imprimir en consola si hubo error para que sepas qué pasó
+            if response.status_code not in [200, 201]:
+                print(f"--- ERROR API ({response.status_code}) ---")
+                print(response_data)
+                print("------------------------------------------")
+
+            # 3. Retornar resultado
             if response.status_code in [200, 201]:
-                return {'success': True, 'data': response.json()}
-            return {'success': False, 'error': response.json()}
+                return {'success': True, 'data': response_data}
+            else:
+                return {'success': False, 'error': response_data}
+
         except Exception as e:
+            print(f"Excepción de conexión: {e}")
             return {'success': False, 'error': str(e)}
 
     def get_ordenes_mantenimiento(self):
