@@ -5,13 +5,17 @@ from django.conf.urls.static import static
 from menu import views  # Importamos solo las vistas del frontend
 
 urlpatterns = [
+    # --- RUTA RAÍZ (ESTA ES LA QUE FALTABA) ---
+    # Esto hace que http://127.0.0.1:8000/ cargue la página principal
+    path('', views.MasterListView.as_view(), name='home'),
+
     # Admin
     path('admin/', admin.site.urls),
     
     # --- VISTAS DEL FRONTEND (Consumen la API externa) ---
     
     # Autenticación y Home
-    path('', views.MasterListView.as_view(), name='master'),
+    path('master/', views.MasterListView.as_view(), name='master'),
     path('menu/', views.MasterListView.as_view(), name='menu_home'),
     path('inicioSesion/', views.inicioPage, name='inicioSesion'),
     path('registro/', views.registroPage, name='registro'),

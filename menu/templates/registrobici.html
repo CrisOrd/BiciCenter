@@ -37,7 +37,7 @@
                        required 
                        minlength="2"
                        maxlength="50"
-                       value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}">
+                       value="{{ cliente.nombre }}">
                 <small class="text-danger d-none" id="nombre-error">El nombre es obligatorio</small>
             </div>
             
@@ -50,7 +50,7 @@
                        required 
                        minlength="2"
                        maxlength="50"
-                       value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}">
+                       value="{{ cliente.apellido }}">
                 <small class="text-danger d-none" id="apellido-error">El apellido es obligatorio</small>
             </div>
             
@@ -63,7 +63,8 @@
                        required 
                        minlength="11"
                        maxlength="12"
-                       {% if cliente and cliente.rut %}value="{{ cliente.rut }}" readonly{% endif %}>
+                       value="{{ cliente.rut }}" 
+                        {% if cliente.rut %}readonly{% endif %}>
                 <small class="text-danger d-none" id="rut-error">El RUT es obligatorio y debe ser válido</small>
             </div>
             
@@ -74,7 +75,8 @@
                        id="email"
                        placeholder="Correo electrónico *" 
                        required 
-                       {% if user.is_authenticated and user.email %}value="{{ user.email }}" readonly{% elif cliente and cliente.email %}value="{{ cliente.email }}" readonly{% endif %}>
+                       value="{{ cliente.email }}" 
+                        {% if cliente.email %}readonly{% endif %}>
                 <small class="text-danger d-none" id="email-error">El correo electrónico es obligatorio</small>
             </div>
             

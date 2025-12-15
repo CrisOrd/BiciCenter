@@ -46,6 +46,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
                 'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -57,14 +58,16 @@ WSGI_APPLICATION = 'bicicenter.wsgi.application'
 
 DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql').lower()
 
-if DB_ENGINE == 'sqlite':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+DATABASES = {
+    'default': {
+        'NAME': 'bicicenter_db',         # La misma DB de la API
+        'ENGINE': 'django.db.backends.mysql',
+        'USER': 'root',
+        'PASSWORD': 'bici12345',
+        'HOST': '136.112.163.234',       # Tu servidor remoto
+        'PORT': '3306',
     }
-
+}
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -121,9 +124,8 @@ if DEBUG:
         'http://localhost:8000',
     ]
 
-# ============================================
-# CONFIGURACIÓN DJANGO REST FRAMEWORK
-# ============================================
+SESSION_COOKIE_NAME = 'sessionid_frontend'
+CSRF_COOKIE_NAME = 'csrftoken_frontend'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
