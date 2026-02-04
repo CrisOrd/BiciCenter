@@ -1,0 +1,122 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}Carrito de Compras - BiciCenter{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+<div class="container my-5">
+    <h2 class="mb-4">🛒 Mi Carrito</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            {% if items %}
+                {% for item in items %}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                
+                                <div class="col-md-2">
+                                    {% if item.producto_imagen %}
+                                        <img src="{{ item.producto_imagen }}" class="img-fluid rounded" style="width: 100%; height: 80px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'img/default.jpg' %}" class="img-fluid rounded" style="width: 100%; height: 80px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h5 class="mb-1 text-primary">{{ item.producto_nombre }}</h5>
+                                    <p class="text-muted mb-0"><small>Tipo: {{ item.tipo_producto|title }}</small></p>
+                                    <p class="text-muted mb-0"><small>Usuario: {{ item.usuario }}</small></p> </div>
+                                
+                                <div class="col-md-3 text-center">
+                                    <label class="small text-muted mb-1">Cantidad</label>
+                                    <form method="POST" action="{% url 'actualizar_cantidad_carrito' item.id %}" class="d-flex justify-content-center align-items-center gap-1">
+                                        {% csrf_token %}
+                                        
+                                        <button class="btn btn-outline-secondary btn-sm" type="submit" name="cantidad" value="{{ item.cantidad|add:'-1' }}" style="width: 30px;">-</button>
+                                        
+                                        <input type="number" 
+                                               class="form-control text-center fw-bold fs-5" 
+                                               value="{{ item.cantidad }}" 
+                                               min="1" 
+                                               max="{{ item.stock_disponible }}" 
+                                               readonly 
+                                               style="width: 60px; border: none; background: #f8f9fa;">
+                                        
+                                        <button class="btn btn-outline-secondary btn-sm" type="submit" name="cantidad" value="{{ item.cantidad|add:'1' }}" style="width: 30px;">+</button>
+                                    </form>
+                                    <small class="text-muted" style="font-size: 0.7rem;">Stock: {{ item.stock_disponible }}</small>
+                                </div>
+                                
+                                <div class="col-md-3 text-end">
+                                    <h5 class="fw-bold mb-0">${{ item.subtotal }}</h5>
+                                    <small class="text-muted d-block mb-2">(${{ item.precio_unitario }} c/u)</small>
+                                    
+                                    <form method="POST" action="{% url 'eliminar_del_carrito' item.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                            <i class="bi bi-trash"></i> Quitar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <div class="text-end">
+                    <form method="POST" action="{% url 'vaciar_carrito' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-link text-secondary text-decoration-none" onclick="return confirm('¿Vaciar todo?');">Vaciar Carrito</button>
+                    </form>
+                </div>
+
+            {% else %}
+                <div class="alert alert-light text-center py-5 border">
+                    <h3>Tu carrito está vacío 🚲</h3>
+                    <div class="mt-4">
+                        <a href="{% url 'bicicletas' %}" class="btn btn-primary">Ver Bicicletas</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-body p-4">
+                    <h4 class="mb-4">Resumen</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Productos:</span>
+                        <span>{{ total_items }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-4 fw-bold">Total a Pagar:</span>
+                        <span class="fs-4 fw-bold text-success">${{ total }}</span>
+                    </div>
+                    
+                    {% if items %}
+                        <form method="POST" action="{% url 'proceder_al_pago' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow">
+                                PROCEDER AL PAGO <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg w-100" disabled>PROCEDER AL PAGO</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

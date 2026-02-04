@@ -1,0 +1,137 @@
+@keyframes smooth-cycle {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(153deg,  rgb(39, 224, 2), rgb(2, 120, 199), rgb(39, 224, 2), rgb(2, 120, 199));
+    background-size: 300% 100%;
+    animation: smooth-cycle 5s infinite linear;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 15px;
+}
+
+.wrapper {
+    max-width: 430px;
+    width: 100%;
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.wrapper img {
+    width: 110px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.wrapper img:hover {
+    transform: scale(1.05);
+}
+
+.wrapper h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.input-box {
+    position: relative;
+    margin: 18px 0;
+}
+
+.input-box input {
+    width: 100%;
+    height: 50px;
+    padding: 0 15px 0 40px;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.input-box input:focus {
+    border-color: rgb(0,168,0);
+    box-shadow: 0 0 0 3px rgba(0,168,0,0.2);
+    outline: none;
+}
+
+.input-box i {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #666;
+    pointer-events: none;
+}
+
+.policy {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 14px;
+    margin: 15px 0;
+    text-align: left;
+}
+
+.policy input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+    width: auto;
+    height: auto;
+}
+
+.policy span {
+    color: #333;
+}
+
+.btn {
+    width: 100%;
+    background: rgb(0,168,0);
+    border: none;
+    padding: 12px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background: rgb(0,140,0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,168,0,0.4);
+}
+
+.text {
+    margin-top: 15px;
+}
+
+.text h3 {
+    font-size: 14px;
+    color: #333;
+    font-weight: 400;
+    margin: 0;
+}
+
+.text a {
+    color: rgb(25,25,112);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.text a:hover {
+    text-decoration: underline;
+}

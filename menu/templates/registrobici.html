@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda tu Cita - BiciCenter</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/registrobici.css' %}">
+</head>
+<body>
+
+    <div class="wrapper">
+        <a href="{% url 'master' %}"><img src="{% static 'img/biciCenter.png' %}" alt="Logo"></a>
+        <h2>Agenda tu Cita</h2>
+    
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    
+        <form method="POST" id="registroForm" novalidate>
+            {% csrf_token %}
+            
+            <div class="input-box">
+                <i class="bi bi-person-fill"></i>
+                <input type="text" 
+                       name="nombre" 
+                       id="nombre"
+                       placeholder="Nombre *" 
+                       required 
+                       minlength="2"
+                       maxlength="50"
+                       value="{{ cliente.nombre }}">
+                <small class="text-danger d-none" id="nombre-error">El nombre es obligatorio</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-person-fill"></i>
+                <input type="text" 
+                       name="apellido" 
+                       id="apellido"
+                       placeholder="Apellido *" 
+                       required 
+                       minlength="2"
+                       maxlength="50"
+                       value="{{ cliente.apellido }}">
+                <small class="text-danger d-none" id="apellido-error">El apellido es obligatorio</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-credit-card-2-front"></i>
+                <input type="text" 
+                       name="rut" 
+                       id="rut" 
+                       placeholder="RUT: 12.345.678-9 *" 
+                       required 
+                       minlength="11"
+                       maxlength="12"
+                       value="{{ cliente.rut }}" 
+                        {% if cliente.rut %}readonly{% endif %}>
+                <small class="text-danger d-none" id="rut-error">El RUT es obligatorio y debe ser válido</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-envelope-fill"></i>
+                <input type="email" 
+                       name="email" 
+                       id="email"
+                       placeholder="Correo electrónico *" 
+                       required 
+                       value="{{ cliente.email }}" 
+                        {% if cliente.email %}readonly{% endif %}>
+                <small class="text-danger d-none" id="email-error">El correo electrónico es obligatorio</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-bicycle"></i>
+                <select name="bike_brand" id="bike_brand" required>
+                    <option value="">Marca de la bicicleta *</option>
+                    <option value="trek">Trek</option>
+                    <option value="giant">Giant</option>
+                    <option value="specialized">Specialized</option>
+                    <option value="cannondale">Cannondale</option>
+                    <option value="scott">Scott</option>
+                    <option value="bianchi">Bianchi</option>
+                    <option value="orbea">Orbea</option>
+                    <option value="merida">Merida</option>
+                    <option value="other">Otra</option>
+                </select>
+                <small class="text-danger d-none" id="bike_brand-error">Selecciona la marca de la bicicleta</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-palette"></i>
+                <select name="bike_color" id="bike_color" required>
+                    <option value="">Color de la bicicleta *</option>
+                    <option value="negro">Negro</option>
+                    <option value="blanco">Blanco</option>
+                    <option value="rojo">Rojo</option>
+                    <option value="azul">Azul</option>
+                    <option value="verde">Verde</option>
+                    <option value="amarillo">Amarillo</option>
+                    <option value="naranja">Naranja</option>
+                    <option value="gris">Gris</option>
+                    <option value="multicolor">Multicolor</option>
+                </select>
+                <small class="text-danger d-none" id="bike_color-error">Selecciona el color de la bicicleta</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-gear"></i>
+                <select name="bike_type" id="bike_type" required>
+                    <option value="">Tipo de bicicleta *</option>
+                    <option value="mountain">Montaña</option>
+                    <option value="road">Ruta</option>
+                    <option value="hybrid">Híbrida</option>
+                    <option value="bmx">BMX</option>
+                    <option value="electric">Eléctrica</option>
+                    <option value="folding">Plegable</option>
+                    <option value="cruiser">Cruiser</option>
+                    <option value="city">Urbana</option>
+                </select>
+                <small class="text-danger d-none" id="bike_type-error">Selecciona el tipo de bicicleta</small>
+            </div>
+            
+            <div class="input-box">
+                <i class="bi bi-calendar"></i>
+                <select name="bike_year" id="bike_year_select" required>
+                    <option value="">Año de la bicicleta *</option>
+                </select>
+                <small class="text-danger d-none" id="bike_year-error">Selecciona el año de la bicicleta</small>
+            </div>
+            
+            <p class="text-muted small text-center mb-3">* Todos los campos son obligatorios</p>
+            
+            <button type="submit" class="btn-register" id="submitBtn">
+                <i class="bi bi-check-circle"></i> Agendar Cita
+            </button>
+        </form>
+        
+        <button type="button" class="btn-cancel" id="cancelBtn">
+            <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+    </div>
+
+    <script>
+        const yearSelect = document.getElementById('bike_year_select');
+        if (yearSelect) {
+            const startYear = 1985;
+            const endYear = new Date().getFullYear();
+            for (let year = endYear; year >= startYear; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function formatRut(value) {
+            let rut = value.replace(/[^0-9kK]/g, '');
+            if (rut.length > 1) {
+                rut = rut.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + rut.slice(-1);
+            }
+            return rut.toUpperCase();
+        }
+
+        const rutEl = document.getElementById('rut');
+        if (rutEl) {
+            // 2. Se usa la función en el evento 'input' (como antes)
+            rutEl.addEventListener('input', function() {
+                this.value = formatRut(this.value);
+            });
+
+            // 3. !! ESTA ES LA LÍNEA CLAVE DEL ARREGLO !!
+            // Si el campo RUT está bloqueado (readonly) y tiene un valor,
+            // se formatea inmediatamente al cargar la página.
+            if (rutEl.readOnly && rutEl.value) {
+                rutEl.value = formatRut(rutEl.value);
+            }
+        }
+
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const errorElement = document.getElementById(this.id + '-error');
+                if (errorElement) {
+                    errorElement.classList.add('d-none');
+                }
+                this.classList.remove('is-invalid');
+            });
+        });
+
+        const registroForm = document.getElementById('registroForm');
+        if (registroForm) {
+            registroForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Reset error states
+                document.querySelectorAll('.text-danger').forEach(el => el.classList.add('d-none'));
+                document.querySelectorAll('input, select').forEach(el => el.classList.remove('is-invalid'));
+                
+                let isValid = true;
+                const requiredFields = [
+                    { id: 'nombre', name: 'Nombre' },
+                    { id: 'apellido', name: 'Apellido' },
+                    { id: 'rut', name: 'RUT' },
+                    { id: 'email', name: 'Email' },
+                    { id: 'bike_brand', name: 'Marca' },
+                    { id: 'bike_color', name: 'Color' },
+                    { id: 'bike_type', name: 'Tipo' },
+                    { id: 'bike_year_select', name: 'Año' }
+                ];
+
+                requiredFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    const errorElement = document.getElementById(field.id === 'bike_year_select' ? 'bike_year-error' : field.id + '-error');
+                    
+                    if (!element.value || element.value.trim() === '') {
+                        isValid = false;
+                        if (errorElement) {
+                            errorElement.classList.remove('d-none');
+                        }
+                        element.classList.add('is-invalid');
+                    }
+                });
+
+                const rutValue = document.getElementById('rut').value;
+                if (rutValue && rutValue.length < 11) {
+                    isValid = false;
+                    const rutError = document.getElementById('rut-error');
+                    if (rutError) {
+                        rutError.textContent = 'El RUT debe tener un formato válido (ej: 12.345.678-9)';
+                        rutError.classList.remove('d-none');
+                    }
+                    document.getElementById('rut').classList.add('is-invalid');
+                }
+
+                const emailValue = document.getElementById('email').value;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailValue && !emailPattern.test(emailValue)) {
+                    isValid = false;
+                    const emailError = document.getElementById('email-error');
+                    if (emailError) {
+                        emailError.textContent = 'El correo electrónico no es válido';
+                        emailError.classList.remove('d-none');
+                    }
+                    document.getElementById('email').classList.add('is-invalid');
+                }
+
+                if (!isValid) {
+                    alert('Por favor, completa todos los campos obligatorios correctamente.');
+                    return false;
+                }
+
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+                }
+                
+                this.submit();
+            });
+        }
+
+        const cancelBtn = document.getElementById('cancelBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas cancelar y volver a la página principal?')) {
+                    window.location.href = "{% url 'master' %}";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

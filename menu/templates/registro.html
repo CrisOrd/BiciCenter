@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+  {% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro de Usuario</title>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+</head>
+<body>
+  <div class="wrapper">
+    <a href="{% url 'master' %}">
+        <img src="{% static 'img/biciCenter.png' %}" alt="Logo" style="cursor: pointer;">
+    </a>
+    <h2>Registro de Usuario</h2>
+    <form method="POST" id="registroForm">
+    {% csrf_token %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="input-box">
+        <i class="bi bi-person-fill"></i>
+        <input type="text" placeholder="Nombre" name="nombre" required> 
+    </div>
+    
+    <div class="input-box">
+        <i class="bi bi-person-fill"></i>
+        <input type="text" placeholder="Apellido" name="apellido" required>
+    </div>
+    
+    <div class="input-box">
+        <i class="bi bi-person-fill"></i>
+        <input type="text" placeholder="Nombre de usuario" name="username" required>
+    </div>
+    <div class="input-box">
+        <i class="bi bi-envelope-fill"></i>
+        <input type="email" placeholder="Correo electrónico" name="email" required>
+    </div>
+    <div class="input-box">
+        <i class="bi bi-card-text"></i>
+        <input type="text" placeholder="RUT" name="rut" id="rut" required>
+    </div>
+    <div class="input-box">
+        <i class="bi bi-lock-fill"></i>
+        <input type="password" placeholder="Contraseña (mínimo 6 caracteres)" name="password" id="password" required minlength="6">
+    </div>
+    <div class="input-box">
+        <i class="bi bi-lock-fill"></i>
+        <input type="password" placeholder="Confirmar contraseña" name="password2" id="password2" required>
+    </div>
+    <div class="policy">
+        <input type="checkbox" required>
+        <span>Acepto los <a href="#">Términos y Condiciones</a></span>
+    </div>
+    <button type="submit" class="btn">Registrar</button>
+    <div class="text">
+        <h3>¿Ya tienes una cuenta? <a href="{% url 'inicioSesion' %}">Inicia sesión</a></h3>
+    </div>
+    </form>
+  </div>
+  
+  <script>
+    const rutInput = document.getElementById('rut');
+    rutInput.addEventListener('input', function() {
+        let rut = this.value.replace(/[^0-9kK]/g, '');
+        if (rut.length > 1) {
+            const dv = rut.slice(-1); 
+            let cuerpo = rut.slice(0, -1);
+            cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            rut = cuerpo + '-' + dv;
+        }
+        this.value = rut.toUpperCase();
+    });
+
+    document.getElementById('registroForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const password2 = document.getElementById('password2').value;
+        
+        if (password !== password2) {
+            e.preventDefault();
+            alert('Las contraseñas no coinciden');
+        }
+    });
+  </script>
+</body>
+</html>

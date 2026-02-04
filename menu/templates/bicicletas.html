@@ -1,0 +1,78 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}Bicicletas - BiciCenter{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4">Bicicletas</h2>
+    
+    <div class="filter-section">
+        <form method="GET" action="{% url 'bicicletas' %}" class="filter-form">
+            <div class="filter-group">
+                <label for="ordenar">Ordenar por:</label>
+                <select name="ordenar" id="ordenar">
+                    <option value="">Seleccionar...</option>
+                    <option value="nombre_asc" {% if request.GET.ordenar == 'nombre_asc' %}selected{% endif %}>Nombre (A-Z)</option>
+                    <option value="nombre_desc" {% if request.GET.ordenar == 'nombre_desc' %}selected{% endif %}>Nombre (Z-A)</option>
+                    <option value="precio_asc" {% if request.GET.ordenar == 'precio_asc' %}selected{% endif %}>Precio (Menor a Mayor)</option>
+                    <option value="precio_desc" {% if request.GET.ordenar == 'precio_desc' %}selected{% endif %}>Precio (Mayor a Menor)</option>
+                    <option value="modelo_asc" {% if request.GET.ordenar == 'modelo_asc' %}selected{% endif %}>Modelo (A-Z)</option>
+                    <option value="modelo_desc" {% if request.GET.ordenar == 'modelo_desc' %}selected{% endif %}>Modelo (Z-A)</option>
+                    <option value="marca_asc" {% if request.GET.ordenar == 'marca_asc' %}selected{% endif %}>Marca (A-Z)</option>
+                    <option value="marca_desc" {% if request.GET.ordenar == 'marca_desc' %}selected{% endif %}>Marca (Z-A)</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="marca">Marca:</label>
+                <select name="marca" id="marca">
+                    <option value="">Todas las marcas</option>
+                    {% for marca in marcas_disponibles %}
+                        <option value="{{ marca }}" {% if request.GET.marca == marca %}selected{% endif %}>{{ marca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter btn-apply">Aplicar Filtros</button>
+                <a href="{% url 'bicicletas' %}" class="btn-filter btn-clear">Limpiar</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if bicicletas %}
+        <div class="results-info">
+            Mostrando <strong>{{ bicicletas|length }}</strong> bicicleta{{ bicicletas|length|pluralize }}
+        </div>
+    {% endif %}
+    
+    <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+        {% for bici in bicicletas %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                <a href="{% url 'producto_detalle' 'bicicleta' bici.id %}" class="text-decoration-none">
+                    {% if bici.imagen %}
+                        <img src="{{ bici.imagen.url }}" class="card-img-top" alt="{{ bici.nombre }}">
+                    {% else %}
+                        <img src="{% static 'img/default_bike.jpg' %}" class="card-img-top" alt="Sin imagen">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">{{ bici.nombre }} - {{ bici.modelo }}</h5>
+                        <p class="card-text text-muted">{{ bici.descripcion|truncatewords:15 }}</p>
+                        <p class="card-text text-success fw-bold">{{ bici.precio_chileno }}</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h5>No hay bicicletas disponibles con los filtros seleccionados</h5>
+                <p>Intenta ajustar los filtros o <a href="{% url 'bicicletas' %}">ver todas las bicicletas</a></p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
